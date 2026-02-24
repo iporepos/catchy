@@ -12,8 +12,6 @@ from losalamos.tools.core import *
 from catchy.core import *
 
 
-
-
 class ScriptBuildImages(Script):
     TITLE = "BUILD IMAGES FROM SVG FILES"
     LOG_NAME = LOG_PREFIX.format("build-images")
@@ -65,8 +63,8 @@ class ScriptBuildImages(Script):
         # Load with progress bar
         # --------------------------------------------------
         #heading_subsection(msg="Load data")
-
-        with tqdm(ls_notes, desc=" >>> loading", unit="file") as pbar:
+        self.print_info("loading data ...")
+        with tqdm(ls_notes, desc=" >>> ", unit="file") as pbar:
             nc.load_list(pbar)
 
         s = get_message(f"{len(ls_notes)} notes loaded to collection.")
@@ -84,19 +82,24 @@ class ScriptBuildImages(Script):
         df_sub_1 = df.query("status == 'concluded'").copy()
         df_sub_2 = df.query("status == 'pending'").copy()
 
-        df = pd.concat([df_sub_1, df_sub_2])
+        df = pd.concat([df_sub_1, df_sub_2]).reset_index(drop=True)
 
         self.print_info(f"{len(df)} notes filtered.")
+
+        print("\n")
+        print(df[["note_name", "title"]])
+        print("\n")
 
         # --------------------------------------------------
         # Process
         # --------------------------------------------------
         #heading_subsection(msg="Render SVG")
+        self.print_info(f"rendering SVGs ...")
         for _, row in tqdm(
                 df.iterrows(),
                 total=len(df),
-                desc=" >>> processing",
-                unit="fig"
+                desc=" >>> ",
+                unit="file"
         ):
 
             f = Path(row["note_file"])
@@ -168,15 +171,17 @@ class ScriptBuildImages(Script):
 
         self.print_info("sending from outputs to drive")
 
-        for f in tqdm(ls_figs, desc="copying figures", unit="file"):
+        for f in tqdm(ls_figs, desc=" >>> ", unit="file"):
             p = Path(f)
             nm = p.stem
             chapter = "chapter" + nm.split("-")[0].replace("C", "")
 
             dst_folder = FIGURES_DIR / f"{chapter}/T1"
             f_dst = dst_folder / p.name
-
-            shutil.copy(src=f, dst=f_dst)
+            if self.write:
+                shutil.copy(src=f, dst=f_dst)
+            else:
+                time.sleep(0.01)
 
 if __name__ == "__main__":
 

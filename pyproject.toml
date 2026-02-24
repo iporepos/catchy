@@ -1,0 +1,9 @@
+[project]
+name = "catchy"
+dynamic = ["version"]    # used for automated versioning
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

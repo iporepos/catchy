@@ -26,7 +26,7 @@ if __name__ == "__main__":
         targets=ls_dirs,
         prefix=PREFIX_PUB_MAIN,
         output_folder=output_folder,
-        surface=True
+        surface=True,
     )
     print("\n\n")
     pprint.pp(o)

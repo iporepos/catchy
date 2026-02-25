@@ -1,7 +1,7 @@
 
 # custom ignores
 config.local.json
-
+bench*
 # Pycharm stuff
 .idea
 

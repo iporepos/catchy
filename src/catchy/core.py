@@ -49,7 +49,7 @@ FIGS_PREFIXES = {
     "cover": "Figure",
     "main text": "Figure",
     "box": "Box",
-    "biography": "Biography"
+    "biography": "Biography",
 }
 
 # FUNCTIONS
@@ -99,7 +99,6 @@ class Script:
     def set_arguments(self, args):
         self.write = args.write
 
-
     @classmethod
     def print_info(cls, msg):
         print(f" >>> {cls.LOG_NAME} INFO {msg}")
@@ -123,7 +122,6 @@ class Script:
         print("\n\n")
         print(80 * char)
 
-
     @staticmethod
     def get_chapter_folder_name(c_n):
         c = str(c_n).zfill(2)
@@ -137,8 +135,6 @@ class Script:
         else:
             chapters = [int(c_n)]
             return chapters
-
-
 
     def gate_keeper(self, msg):
         self.print_warn("WARNING")
@@ -187,15 +183,15 @@ class Script:
             self.print_chap(chapter)
             self.current_chapter = chapter
 
-            # Setup
-            # ------------------------------------------------------------------
             self.print_step("Starting processing")
             self.processing()
+
+        self.print_step("Done")
+
 
     def set_src_dir(self, c_n):
         cnm = self.get_chapter_folder_name(c_n)
         self.src_dir = FIGURES_DIR / cnm
-
 
     def processing(self):
         print("okok")

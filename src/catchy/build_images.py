@@ -1,13 +1,16 @@
 import time
 import pprint, os
 from pathlib import Path
+
 # external
 from tqdm import tqdm
 import pandas as pd
+
 # custom
 from losalamos.notes import NoteCollFigure
 from losalamos.figures import FigureSVG
 from losalamos.tools.core import *
+
 # local
 from catchy.core import *
 
@@ -39,7 +42,6 @@ class ScriptBuildImages(Script):
         super().set_arguments(args)
         self.collection = args.collection
 
-
     def processing(self):
         c_n = self.current_chapter
         self.set_src_dir(c_n=self.current_chapter)
@@ -62,7 +64,7 @@ class ScriptBuildImages(Script):
         # --------------------------------------------------
         # Load with progress bar
         # --------------------------------------------------
-        #heading_subsection(msg="Load data")
+        # heading_subsection(msg="Load data")
         self.print_info("loading data ...")
         with tqdm(ls_notes, desc=" >>> ", unit="file") as pbar:
             nc.load_list(pbar)
@@ -73,14 +75,14 @@ class ScriptBuildImages(Script):
         # --------------------------------------------------
         # Work dataframe
         # --------------------------------------------------
-        #heading_subsection(msg="Filter data")
+        # heading_subsection(msg="Filter data")
         self.print_info(f"filtering data ...")
 
         df_full = nc.catalog.copy()
 
         df = df_full.copy()
         df_sub_1 = df.query("status == 'concluded'").copy()
-        df_sub_2 = df.query("status == 'pending'").copy()
+        df_sub_2 = df[df['status'].str.contains('pending', na=False)]
 
         df = pd.concat([df_sub_1, df_sub_2]).reset_index(drop=True)
 
@@ -93,14 +95,9 @@ class ScriptBuildImages(Script):
         # --------------------------------------------------
         # Process
         # --------------------------------------------------
-        #heading_subsection(msg="Render SVG")
+        # heading_subsection(msg="Render SVG")
         self.print_info(f"rendering SVGs ...")
-        for _, row in tqdm(
-                df.iterrows(),
-                total=len(df),
-                desc=" >>> ",
-                unit="file"
-        ):
+        for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="file"):
 
             f = Path(row["note_file"])
             fsvg = f.parent / f"{f.stem}.svg"
@@ -112,10 +109,14 @@ class ScriptBuildImages(Script):
             svg.load_data(fsvg)
 
             if self.write:
-                self.build_image(f.stem, svg, row, build_jpeg=True, delete_png=True, opacity=1)
+                self.build_image(
+                    f.stem, svg, row, build_jpeg=True, delete_png=True, opacity=1
+                )
 
                 if row["collection"] == "box":
-                    self.build_image(f.stem, svg, row, build_jpeg=False, delete_png=False, opacity=0)
+                    self.build_image(
+                        f.stem, svg, row, build_jpeg=False, delete_png=False, opacity=0
+                    )
             else:
                 time.sleep(0.01)
 
@@ -124,7 +125,9 @@ class ScriptBuildImages(Script):
         self.print_step("Done")
         return None
 
-    def build_image(self, fname, svg_note, metadata, build_jpeg=False, delete_png=False, opacity=1):
+    def build_image(
+        self, fname, svg_note, metadata, build_jpeg=False, delete_png=False, opacity=1
+    ):
         f = Path(metadata["note_file"])
 
         chapter_dir = f.parent
@@ -153,10 +156,7 @@ class ScriptBuildImages(Script):
             hide_layers=ls_hide,
         )
         if build_jpeg:
-            svg_note.image_to_jpeg(
-                file_input=fo,
-                file_output=fo2
-            )
+            svg_note.image_to_jpeg(file_input=fo, file_output=fo2)
 
         if delete_png:
             os.remove(fo)
@@ -182,6 +182,7 @@ class ScriptBuildImages(Script):
                 shutil.copy(src=f, dst=f_dst)
             else:
                 time.sleep(0.01)
+
 
 if __name__ == "__main__":
 

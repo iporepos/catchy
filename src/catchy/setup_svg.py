@@ -8,6 +8,7 @@ from losalamos.tools.core import *
 
 from catchy.core import *
 
+
 class ScriptSetupSVG(Script):
     TITLE = "SETUP SVG FILES"
     LOG_NAME = LOG_PREFIX.format("setup-svg")
@@ -82,12 +83,7 @@ class ScriptSetupSVG(Script):
         # Process
         # --------------------------------------------------
         c = 0
-        for _, row in tqdm(
-                df.iterrows(),
-                total=len(df),
-                desc=" >>> ",
-                unit="files"
-        ):
+        for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="files"):
             f = Path(row["note_file"])
             fsvg = f.parent / f"{f.stem}.svg"
             # print(fsvg)
@@ -103,4 +99,3 @@ if __name__ == "__main__":
 
     s = ScriptSetupSVG()
     s.run()
-

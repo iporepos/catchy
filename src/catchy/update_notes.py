@@ -3,6 +3,7 @@ from tqdm import tqdm
 from losalamos.notes import NoteFigure
 from catchy.core import *
 
+
 class ScriptUpdateNotes(Script):
     TITLE = "UPDATE NOTES"
     LOG_NAME = LOG_PREFIX.format("update-notes")
@@ -35,7 +36,7 @@ class ScriptUpdateNotes(Script):
         for f_note in tqdm(ls_notes, desc="Updating notes", unit="note"):
             p = Path(f_note)
 
-            #self.print_step(f"updating {p.name}")
+            # self.print_step(f"updating {p.name}")
 
             # Load
             # ---------------------------------------
@@ -73,7 +74,6 @@ class ScriptUpdateNotes(Script):
 
         self.print_step("Done")
         return None
-
 
 
 if __name__ == "__main__":

@@ -38,6 +38,7 @@ FIGURES_DIR = BASE_DIR / "figures/main"
 CAPTIONS_DIR = FIGURES_DIR / "captions"
 DOCUMENTS_DIR = BASE_DIR / "documents"
 CATALOG_DIR = BASE_DIR / "Catalogue"
+DATA_DIR = BASE_DIR / "data"
 
 PREFIX_PUB_MAIN = str(config["prefix_publish_main"])
 PREFIX_PUB_SRC = str(config["prefix_publish_src"])
@@ -188,7 +189,6 @@ class Script:
 
         self.print_step("Done")
 
-
     def set_src_dir(self, c_n):
         cnm = self.get_chapter_folder_name(c_n)
         self.src_dir = FIGURES_DIR / cnm
@@ -201,6 +201,7 @@ if __name__ == "__main__":
 
     print(BASE_DIR)
     print(CAPTIONS_DIR)
+    print(DATA_DIR)
 
     print("Hello World!")
 

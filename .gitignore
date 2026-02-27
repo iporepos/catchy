@@ -1,6 +1,7 @@
 
 # custom ignores
 config.local.json
+tests/data/outputs
 bench*
 # Pycharm stuff
 .idea

@@ -14,11 +14,8 @@ from losalamos.tools.core import *
 # local
 from catchy.core import *
 
+URL_PATTERN = re.compile(r"(https?://[^\s\\]+)", flags=re.IGNORECASE)
 
-URL_PATTERN = re.compile(
-    r'(https?://[^\s\\]+)',
-    flags=re.IGNORECASE
-)
 
 def latexify_urls(text: str) -> str:
 
@@ -26,17 +23,19 @@ def latexify_urls(text: str) -> str:
         url = match.group(0)
 
         # Strip trailing punctuation
-        trailing = ''
-        while url[-1] in '.,);:':
+        trailing = ""
+        while url[-1] in ".,);:":
             trailing = url[-1] + trailing
             url = url[:-1]
 
-        return r'\url{' + url + '}' + trailing
+        return r"\url{" + url + "}" + trailing
 
     return URL_PATTERN.sub(replacer, text)
 
+
 def remove_non_ascii(text: str) -> str:
     return text.encode("ascii", "ignore").decode("ascii")
+
 
 class ScriptBuildCatalog(Script):
     TITLE = "BUILD CATALOG"
@@ -56,7 +55,6 @@ class ScriptBuildCatalog(Script):
 
         nc = NoteCollFigure()
 
-
         # Discover notes
         # --------------------------------------------------
 
@@ -66,7 +64,6 @@ class ScriptBuildCatalog(Script):
         if len(ls_notes) == 0:
             self.print_warn("WARNING >>> 0 notes found")
             return None
-
 
         # Load
         # --------------------------------------------------
@@ -97,9 +94,8 @@ class ScriptBuildCatalog(Script):
         df = pd.concat([df_cov, df_mtx, df_bio, df_box]).reset_index(drop=True)
 
         print("\n")
-        print(df[["collection", "title", "category",  "note_name",  "status", "size"]])
+        print(df[["collection", "title", "category", "note_name", "status", "size"]])
         print("\n")
-
 
         # Process
         # --------------------------------------------------
@@ -134,8 +130,6 @@ class ScriptBuildCatalog(Script):
         # --------------------------------------------------
         self.copy_figures_to_chapter()
 
-
-
     def generate_chapter_tex(self, ls_figs, table):
 
         paths = [Path(f) for f in ls_figs]
@@ -164,7 +158,9 @@ class ScriptBuildCatalog(Script):
 
     def generate_table_tex(self, df):
         chnm = "Chapter " + str(self.current_chapter)
-        df_entry = df[["collection", "title", "category",  "note_name",  "status", "size"]].copy()
+        df_entry = df[
+            ["collection", "title", "category", "note_name", "status", "size"]
+        ].copy()
 
         ls_title = list()
         ls_category = list()
@@ -173,7 +169,10 @@ class ScriptBuildCatalog(Script):
         ls_size = list()
 
         for _, row in tqdm(
-                df_entry.iterrows(), total=len(df), desc=" >>> ", unit="file",
+            df_entry.iterrows(),
+            total=len(df),
+            desc=" >>> ",
+            unit="file",
         ):
             ls_category.append(self.get_category(row))
             ls_files.append(self.get_file_texttt(row))
@@ -195,13 +194,24 @@ class ScriptBuildCatalog(Script):
         df["Collection"] = df_entry["collection"]
         df["Chapter"] = chnm
         df["N"] = df.index + 1
-        df = df[["N", "Chapter", "Title", "File", "Collection", "Category", "Width", "Status MVP"]].copy()
+        df = df[
+            [
+                "N",
+                "Chapter",
+                "Title",
+                "File",
+                "Collection",
+                "Category",
+                "Width",
+                "Status MVP",
+            ]
+        ].copy()
 
         s = df.to_latex(
             index=False,
             caption=(f"Status Report of {chnm}", f"Status Report of {chnm}"),
             column_format="llllllll",
-            label=""
+            label="",
         )
 
         # Wrapping the output in a specific size
@@ -209,21 +219,25 @@ class ScriptBuildCatalog(Script):
         table_s = s.replace(r"\begin{table}", new)
 
         s1 = r"\noindent \textbf{Status report}: " + chnm + r" \\ " + "\n"
-        s1 = s1  + r"\noindent \\" + "\n"
-        r'''
+        s1 = s1 + r"\noindent \\" + "\n"
+        r"""
         s1 = s1 + r"\noindent \small \textbf{Concluded}: \\" + "\n"
         s1 = s1 + r"\noindent \small \textbf{Pending}: \\" + "\n"
         s1 = s1 + r"\noindent \small \textbf{Untouched}: \\" + "\n"
-        '''
-        final_output = s1 + "\n" + table_s + "\n" + r"\vspace{5cm}" + "\n" + r"\clearpage"
+        """
+        final_output = (
+            s1 + "\n" + table_s + "\n" + r"\vspace{5cm}" + "\n" + r"\clearpage"
+        )
 
         return final_output
-
 
     def generate_figure_tex(self, df, template):
         ls_tex_figures = list()
         for _, row in tqdm(
-            df.iterrows(), total=len(df), desc=" >>> ", unit="file"  ,
+            df.iterrows(),
+            total=len(df),
+            desc=" >>> ",
+            unit="file",
         ):
             content_print = template[:]
 
@@ -245,7 +259,7 @@ class ScriptBuildCatalog(Script):
             dc["[[width]]"] = self.get_width(row)
             dc["[[width_print]]"] = self.get_width_print(row)
             dc["[[status_mvp]]"] = self.get_status_mvp(row)
-            dc["[[status_ftp]]"] =  self.get_status_ftp(row)
+            dc["[[status_ftp]]"] = self.get_status_ftp(row)
 
             # pprint.pp(dc)
 
@@ -281,7 +295,7 @@ class ScriptBuildCatalog(Script):
     def copy_figures_to_chapter(self):
 
         chn = self.get_chapter_folder_name(self.current_chapter)
-        dst_dir = DOCUMENTS_DIR /f"catalog/figs/{chn}"
+        dst_dir = DOCUMENTS_DIR / f"catalog/figs/{chn}"
 
         src_dir = FIGURES_DIR / f"{chn}"
 
@@ -301,7 +315,6 @@ class ScriptBuildCatalog(Script):
                 shutil.copy(src=f, dst=f_dst)
 
         return None
-
 
     def get_status_mvp(self, dc):
         s = dc.get("status", "stand-by")
@@ -376,7 +389,7 @@ class ScriptBuildCatalog(Script):
             s = "No comments found."
         else:
             s = s.replace('"', "")
-            s = s.replace('>>>', "")
+            s = s.replace(">>>", "")
             s = s.replace("_", " ")
             s = s.replace("^", " ")
             s = s.replace("#", " ")
@@ -426,7 +439,7 @@ class ScriptBuildCatalog(Script):
             if "---" in line:
                 b_collect = False
 
-        #so2 = r"\begin{verbatim} \\ " + so + r" \\ \end{verbatim}"
+        # so2 = r"\begin{verbatim} \\ " + so + r" \\ \end{verbatim}"
 
         return so
 
@@ -480,13 +493,14 @@ class ScriptBuildCatalog(Script):
         if s is None or isinstance(s, float):
             return r"\colorbox{YellowOrange}{undefined}"
         else:
-            s = s.replace('"', '')
+            s = s.replace('"', "")
             s = s.replace("%", "\\%")
             s = s.replace("_", " ")
             s = s.replace("#", " ")
             s = s.replace("^", " ")
             s = remove_non_ascii(s)
             return s
+
 
 if __name__ == "__main__":
 

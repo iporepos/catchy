@@ -1,0 +1,16 @@
+{
+  "figure": {
+    "size": "M",
+    "output_dir": "raw"
+  },
+  "data": [
+    {
+      "path": "chapter01/Figure1-18_SOI_annual_average.csv",
+      "xlim": [80, 120],
+      "ylim": [80, 120]
+    },
+    {
+      "path": "chapter01/Figure1-18_SOI_monthly_values.csv"
+    }
+  ]
+}

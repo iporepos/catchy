@@ -1,2 +1,4 @@
 # catchy
-Python modules and scripts supporting scientific illustration
+
+Python modules, scripts and specs supporting scientific illustrations of a Hydrology Textbook.
+

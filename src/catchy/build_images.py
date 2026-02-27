@@ -82,7 +82,7 @@ class ScriptBuildImages(Script):
 
         df = df_full.copy()
         df_sub_1 = df.query("status == 'concluded'").copy()
-        df_sub_2 = df[df['status'].str.contains('pending', na=False)]
+        df_sub_2 = df[df["status"].str.contains("pending", na=False)]
 
         df = pd.concat([df_sub_1, df_sub_2]).reset_index(drop=True)
 

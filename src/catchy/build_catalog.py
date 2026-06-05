@@ -1,3 +1,112 @@
+"""
+ScriptBuildCatalog — LaTeX Figure Catalog Generator
+====================================================
+Builds a per-chapter LaTeX catalog document from figure note metadata,
+combining a status-report table with individual per-figure TeX entries
+generated from a shared template. Also mirrors figure image files into the
+catalog directory tree for standalone compilation.
+
+Subclasses :class:`losalamos.tools.core.Script`, inheriting CLI argument
+parsing (``--chapter``, ``--write``), safe/write mode gating with user
+confirmation, standard console logging (INFO / STEP / WARN), and chapter
+iteration over the range defined in ``config.local.json``.
+
+Usage
+-----
+    python build_catalog.py --chapter <N|all> [-w]
+
+Arguments
+---------
+    --chapter       Chapter number to process, or ``all`` to iterate over
+                    [CHAPTER_START, CHAPTER_END] as set in config.local.json.
+                    Inherited from Script.get_parser().
+    -w / --write    Enable write mode. Without this flag, figure TeX files
+                    are processed but never written (safe mode sleeps 20 ms
+                    per figure to simulate work). With it, a confirmation
+                    prompt is shown before any files are touched.
+
+Behaviour (per chapter)
+-----------------------
+    1. Globs FIGURES_DIR / chapter<NN> / C*-*-*.md and loads all notes
+       into a NoteCollFigure collection.
+    2. Splits notes into four sub-DataFrames by collection (cover, main
+       text, biography, box), sorts each by order, then concatenates them
+       in that display order.
+    3. Generates per-figure TeX entries (generate_figure_tex):
+           - Loads _catalog_figure.tex from FOLDER_TEMPLATES_DOCUMENTS.
+           - Substitutes [[placeholder]] tokens with derived field values
+             (title, label, file paths, caption, category, credits, width,
+             status, etc.).
+           - Writes one .tex file per figure to STD_OUTPUT (write mode only),
+             then copies each to FIGURES_DIR / chapter<NN>/ via
+             send_figures_tex().
+    4. Generates a LaTeX status-report table (generate_table_tex) using
+       pandas.DataFrame.to_latex(), wrapping it in \\scriptsize/\\sffamily
+       and prefixing a bold chapter heading.
+    5. Merges the table and all per-figure TeX entries into a single chapter
+       file at DOCUMENTS_DIR / catalog/chapters/chapter<NN>.tex
+       (generate_chapter_tex).
+    6. Copies T0 and T1 JPEG/PNG figure images into
+       DOCUMENTS_DIR / catalog/figs/chapter<NN>/T0|T1/ for standalone
+       catalog compilation (copy_figures_to_chapter).
+
+Field derivation helpers
+------------------------
+    get_status_mvp   LimeGreen=concluded, YellowOrange=pending,
+                     RedOrange=untouched (stand-by), Gray=undefined.
+                     Any status containing 'ftp' is treated as concluded.
+    get_status_ftp   Concluded/pending only within 'ftp'-tagged statuses;
+                     all others render as Gray/undefined.
+    get_file_path    Constructs the relative image path for T0/T1 tiers;
+                     T1 path falls back to 'example-image' for stand-by notes.
+    get_width        Maps size codes (XS/S/M/L/XL) to mm values
+                     (30/81/120/170/210 mm); undefined renders as highlighted.
+    get_width_print  Clamps XL (210 mm) to 170 mm for print layout; inherits
+                     120 mm fallback for undefined sizes.
+    get_credits      Handles three cases: "The Authors" (verbatim),
+                     "on credits" (reads a # Credits section from the note
+                     body via get_credits_from_data), or a literal source
+                     string. All URLs are wrapped with latexify_urls().
+    get_caption      Escapes %, _, #, ^ and strips non-ASCII before output.
+    get_comment      Same sanitisation as caption; replaces >>> markers.
+
+Module-level utilities
+----------------------
+    latexify_urls(text)      Wraps bare http/https URLs in \\url{}, stripping
+                             trailing punctuation (.,);:) before wrapping.
+    remove_non_ascii(text)   Strips all non-ASCII characters via ASCII
+                             encode/decode round-trip.
+
+Key paths (resolved from config.local.json at import time)
+-----------------------------------------------------------
+    Notes root:      FIGURES_DIR / chapter<NN>/  (BASE_DIR / "figures/main")
+    Template:        FOLDER_TEMPLATES_DOCUMENTS / "_catalog_figure.tex"
+    Figure TeX out:  STD_OUTPUT / <name>.tex  (per figure, then copied)
+    Chapter TeX out: DOCUMENTS_DIR / catalog/chapters/chapter<NN>.tex
+    Image mirror:    DOCUMENTS_DIR / catalog/figs/chapter<NN>/T0|T1/
+
+Dependencies
+------------
+    losalamos.notes         NoteCollFigure, NoteFigure
+    losalamos.paths         FOLDER_TEMPLATES_DOCUMENTS
+    losalamos.tools.core    Script, LOG_PREFIX, NOTE_PATTERN,
+                            FIGURES_DIR, DOCUMENTS_DIR, STD_OUTPUT
+    catchy.core             (project-level utilities)
+    pandas                  DataFrame construction and to_latex() export
+
+Notes
+-----
+    - The [[placeholder]] substitution in generate_figure_tex is a simple
+      str.replace pass over the template; token collisions between field
+      values and other tokens are not guarded against.
+    - send_figures_tex derives the destination chapter folder from the figure
+      filename prefix (C<NN>-…), so filenames must follow the C<NN>-<col>-<name>
+      convention to route correctly.
+    - copy_figures_to_chapter always runs regardless of write mode, since it
+      operates on already-published image files rather than note data.
+    - Non-ASCII stripping in get_comment/get_caption is lossy; characters with
+      diacritics (accented author names, etc.) will be silently dropped.
+"""
 import pprint
 import shutil
 import time

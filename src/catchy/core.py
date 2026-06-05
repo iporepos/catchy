@@ -1,3 +1,16 @@
+"""
+Core Module
+===========
+
+This module establishes the foundational configuration, directory paths, and
+base scripting functionalities for the project.
+
+It dynamically loads local configurations from ``config.local.json`` to set up
+essential path constants (e.g., base directories, figures, documents, data).
+Additionally, it provides the base :class:`Script` class to handle common
+Command-Line Interface (CLI) operations, user confirmation gates, standard
+logging, and chapter-wise execution flows.
+"""
 # IMPORTS
 # ***********************************************************************
 # import modules from other libs
@@ -58,6 +71,27 @@ FIGS_PREFIXES = {
 
 
 class Script:
+    """
+    Base class for executing chapter-processing scripts.
+
+    This class provides a standardized framework for command-line argument parsing,
+    execution mode management (enforcing safe mode versus write mode with user
+    confirmation), standard console output/logging, and batch chapter iteration.
+    It is designed to be subclassed, where specific logic should be implemented
+    by overriding the :meth:`processing` method.
+
+    :cvar TITLE: The title of the script, displayed upon execution.
+    :type TITLE: str
+    :cvar LOG_NAME: The standard prefix used for console logging outputs.
+    :type LOG_NAME: str
+
+    :ivar write: Flag indicating whether the script is permitted to overwrite data.
+    :vartype write: bool
+    :ivar src_dir: The source directory path for the current chapter being processed.
+    :vartype src_dir: pathlib.Path or None
+    :ivar current_chapter: The specific chapter number currently being processed.
+    :vartype current_chapter: int or None
+    """
     TITLE = "BASE SCRIPT"
     LOG_NAME = LOG_PREFIX.format("script")
 

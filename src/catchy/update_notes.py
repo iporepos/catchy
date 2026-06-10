@@ -68,6 +68,7 @@ Notes
     - If 0 notes are found the script warns and exits the chapter cleanly
       without raising an exception.
 """
+
 import time
 from tqdm import tqdm
 from losalamos.notes import NoteFigure
@@ -144,7 +145,6 @@ class ScriptUpdateNotes(Script):
 
             n.metadata["file"] = '"[[{}_T1.{}]]"'.format(label, suf)
             n.metadata["file_draft"] = '"[[{}_T0.jpeg]]"'.format(label)
-
 
             # Save
             # ---------------------------------------

@@ -61,6 +61,7 @@ Notes
       meaningful effect here since shutil.copy is always executed; consider
       guarding the copy call with ``if self.write`` in a future revision.
 """
+
 import shutil
 from pathlib import Path
 from tqdm import tqdm

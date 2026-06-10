@@ -107,6 +107,7 @@ Notes
     - Non-ASCII stripping in get_comment/get_caption is lossy; characters with
       diacritics (accented author names, etc.) will be silently dropped.
 """
+
 import pprint
 import shutil
 import time

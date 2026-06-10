@@ -11,6 +11,7 @@ Additionally, it provides the base :class:`Script` class to handle common
 Command-Line Interface (CLI) operations, user confirmation gates, standard
 logging, and chapter-wise execution flows.
 """
+
 # IMPORTS
 # ***********************************************************************
 # import modules from other libs
@@ -92,6 +93,7 @@ class Script:
     :ivar current_chapter: The specific chapter number currently being processed.
     :vartype current_chapter: int or None
     """
+
     TITLE = "BASE SCRIPT"
     LOG_NAME = LOG_PREFIX.format("script")
 

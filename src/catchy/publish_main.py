@@ -48,6 +48,7 @@ Notes
       called with an empty target list; behaviour in that case depends on
       losalamos internals.
 """
+
 import losalamos
 from catchy.core import *
 

@@ -11,6 +11,7 @@ conversion of SVGs using the Los Alamos custom tools. Rendered images are
 subsequently distributed to their designated chapter directories within the
 configured drive or file system.
 """
+
 import time
 import pprint, os
 from pathlib import Path
@@ -48,6 +49,7 @@ class ScriptBuildFigures(Script):
     :ivar collection: The specific figure collection targeted for processing (defaults to "all").
     :vartype collection: str
     """
+
     TITLE = "BUILD IMAGES FROM SVG FILES"
     LOG_NAME = LOG_PREFIX.format("build-images")
 
@@ -165,10 +167,13 @@ class ScriptBuildFigures(Script):
 
                 # image building
                 self.build_image(
-                    f.stem, svg, row, build_jpeg=is_not_box, delete_png=is_not_box, opacity=current_opacity
+                    f.stem,
+                    svg,
+                    row,
+                    build_jpeg=is_not_box,
+                    delete_png=is_not_box,
+                    opacity=current_opacity,
                 )
-
-
 
             else:
                 time.sleep(0.01)

@@ -1,7 +1,7 @@
 """
 ScriptSetupSVG — Batch SVG Template Initializer
 ================================================
-Copies a blank SVG template (_wien.svg) alongside each figure note that is
+Copies a blank SVG template (_chennai.svg) alongside each figure note that is
 currently in 'stand-by' status, seeding it for illustration work.
 
 Subclasses :class:`losalamos.tools.core.Script`, which provides CLI argument
@@ -35,12 +35,12 @@ Behaviour
     2. Globs FIGURES_DIR / chapter<NN> / C*-<col>-*.md for note files.
     3. Loads matched paths into a NoteCollFigure collection.
     4. Filters the catalog DataFrame to rows where status == 'stand-by'.
-    5. For each filtered note, copies _wien.svg to <note_stem>.svg in the
+    5. For each filtered note, copies _chennai.svg to <note_stem>.svg in the
        same directory (shutil.copy — overwrites silently on repeat runs).
 
 Key paths (resolved from config.local.json at import time)
 -----------------------------------------------------------
-    Template SVG:   FOLDER_TEMPLATES_DRAWINGS / "_wien.svg"
+    Template SVG:   FOLDER_TEMPLATES_DRAWINGS / "_chennai.svg"
     Notes root:     FIGURES_DIR  (BASE_DIR / "figures/main")
     Output:         FIGURES_DIR / chapter<NN> / <note_stem>.svg
 
@@ -102,7 +102,7 @@ class ScriptSetupSVG(Script):
 
     def processing(self):
 
-        src_file = FOLDER_TEMPLATES_DRAWINGS / "_wien.svg"
+        src_file = FOLDER_TEMPLATES_DRAWINGS / "_chennai.svg"
 
         c_n = self.current_chapter
         self.set_src_dir(c_n=self.current_chapter)

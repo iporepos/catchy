@@ -213,7 +213,7 @@ class ScriptBuildCatalog(Script):
 
         # load template
         self.print_info(f"{chn} -- loading template ...")
-        f_template = FOLDER_TEMPLATES_DOCUMENTS / "_catalog_figure.tex"
+        f_template = FOLDER_TEMPLATES_DOCUMENTS / "/tex/_catalog_figure.tex"
 
         with f_template.open("r", encoding="utf-8") as f:
             content = f.read()

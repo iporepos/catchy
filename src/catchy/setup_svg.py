@@ -140,7 +140,7 @@ class ScriptSetupSVG(Script):
         self.print_info(f"{len(df)} notes filtered.")
 
         print("\n")
-        print(df[["note_name", "title"]])
+        print(df[["note_name", "title", "status"]])
         print("\n")
 
         # --------------------------------------------------

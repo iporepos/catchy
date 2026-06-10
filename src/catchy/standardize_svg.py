@@ -178,5 +178,3 @@ if __name__ == "__main__":
 
     s = ScriptStandardize()
     s.run()
-
-    print("Hello")

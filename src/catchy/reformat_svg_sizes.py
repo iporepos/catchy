@@ -16,11 +16,7 @@ from losalamos.figures import FigureSVG
 from losalamos.tools.core import *
 from catchy.core import *
 
-DC_NEW_WIDTHS = {
-    "L": str(172),
-    "M": str(126),
-    "S": str(83.5)
-}
+DC_NEW_WIDTHS = {"L": str(172), "M": str(126), "S": str(83.5)}
 
 
 def fix_layer_scale(fig, label="frames"):
@@ -126,7 +122,7 @@ class ScriptReformatFonts(Script):
 
         self.print_info(f"processing data")
         for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="files"):
-        #for row in df.to_dict(orient='records'):
+            # for row in df.to_dict(orient='records'):
             # =============================
             # Load figure
             f = Path(row["note_file"])
@@ -143,11 +139,15 @@ class ScriptReformatFonts(Script):
             # Set width property
             dc_layers = fig.get_layers()
             dc_elements = fig.get_layer_elements(label="frames")
-            #pprint.pp(dc_elements)
+            # pprint.pp(dc_elements)
 
             for k in list(DC_NEW_WIDTHS.keys()):
                 if k in dc_elements:
-                    fig.set_property(element=dc_elements[k]["element"], key="width", value=DC_NEW_WIDTHS[k])
+                    fig.set_property(
+                        element=dc_elements[k]["element"],
+                        key="width",
+                        value=DC_NEW_WIDTHS[k],
+                    )
 
             fig.save()
             counter += 1

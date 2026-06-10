@@ -124,7 +124,7 @@ class ScriptReformatFonts(Script):
         counter_fonts = 0
 
         self.print_info(f"processing data")
-        #for row in df.to_dict(orient='records'):
+        # for row in df.to_dict(orient='records'):
         for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="files"):
 
             # =============================

@@ -1,6 +1,7 @@
 """
 Head docs
 """
+
 import re
 import shutil
 import pprint
@@ -13,6 +14,7 @@ from losalamos.tools.core import *
 from catchy.core import *
 
 FLAG = ">>> Ipo@2026-06 SVG Reformatted. T2 fine-tune adjust margins and symbols"
+
 
 class ScriptReformatFlags(Script):
     TITLE = "REFORMAT FLAGS"
@@ -65,25 +67,24 @@ class ScriptReformatFlags(Script):
         counter = 0
 
         self.print_info(f"processing data")
-        #for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="files"):
-        for row in df.to_dict(orient='records'):
+        # for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="files"):
+        for row in df.to_dict(orient="records"):
             # =============================
             # find note
             n = row["note_name"]
             dc_metadata = nc.collection[n].metadata
             comment = dc_metadata.get("comment", None)
 
-
             if comment is None:
-                comment = ''
+                comment = ""
 
-            comment = comment.replace('"', '')
+            comment = comment.replace('"', "")
 
             if FLAG in comment:
                 continue
 
-            comment = comment + ' ' + FLAG
-            nc.collection[n].metadata['comment'] = f'"{comment}"'
+            comment = comment + " " + FLAG
+            nc.collection[n].metadata["comment"] = f'"{comment}"'
             nc.collection[n].save()
             counter += 1
 

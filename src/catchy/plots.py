@@ -98,15 +98,27 @@ class PlotTimeSeries(Plotter):
 
     def _load_data(self):
         super()._load_data()
-        if self.spec["date_col"] == "year":
+        date_col = self.spec["date_col"]
+        if date_col == "year":
             self.date_col = "year"
             for i in range(len(self.data)):
                 self.data[i] = self.handle_yearly_series(df=self.data[i])
+        elif date_col == "year_month":
+            self.date_col = "date"
+            for i in range(len(self.data)):
+                self.data[i] = self.handle_monthly_series(df=self.data[i])
         else:
             for i in range(len(self.data)):
                 self.data[i][self.date_col] = pd.to_datetime(
                     self.data[i][self.date_col]
                 )
+
+    def handle_monthly_series(self, df):
+        df[self.date_col] = pd.to_datetime(
+            df["year"].astype(str) + "-" + df["month"].astype(str).str.zfill(2) + "-01"
+        )
+        df.sort_values(by=self.date_col, inplace=True)
+        return df
 
     def handle_yearly_series(self, df):
         df[self.date_col] = df[self.date_col].astype(str)
@@ -172,13 +184,21 @@ class PlotBivar(Plotter):
             # ---------------------------------------
             # LINES
             for line in ds.get("lines", []):
-                x = line.get("x_field", "X")
-                y = line.get("y_field", "Y")
+                x_data = line.get("x_data", None)
+                y_data = line.get("y_data", None)
+                if x_data and y_data:
+                    x_values = x_data
+                    y_values = y_data
+                else:
+                    x = line.get("x_field", "X")
+                    y = line.get("y_field", "Y")
+                    x_values = df[x]
+                    y_values = df[y]
                 c = line.get("color", "black")
                 linestyle = line.get("linestyle", "-")
                 drawstyle = line.get("drawstyle", "default")
                 zorder = line.get("zorder", 0)
-                ax.plot(df[x], df[y], color=c, linestyle=linestyle,
+                ax.plot(x_values, y_values, color=c, linestyle=linestyle,
                          drawstyle=drawstyle, zorder=zorder)
 
             # ---------------------------------------
@@ -189,7 +209,13 @@ class PlotBivar(Plotter):
                 c = scatter.get("color", "black")
                 marker = scatter.get("marker", "o")
                 zorder = scatter.get("zorder", 0)
-                ax.scatter(df[x], df[y], color=c, marker=marker, zorder=zorder)
+                alpha = scatter.get("alpha", 1)
+                edgecolors = scatter.get("edgecolors", None)
+                ax.scatter(df[x], df[y],
+                           color=c, marker=marker,
+                           zorder=zorder,
+                           alpha=alpha,
+                           edgecolors=edgecolors)
 
             # ---------------------------------------
             # ANNOTATIONS

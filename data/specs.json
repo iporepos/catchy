@@ -1,5 +1,458 @@
 {
   "chapter01": {
+    "C01-mtx-soi": {
+      "class": "time-series",
+      "size": "L",
+      "height": 40,
+      "date_col": "year_month",
+      "ylim": [-70, 1550],
+      "xlim": ["1950-01-01", "2021-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "data": [
+        {
+          "path": "Figure1-18_SOI_monthly_values.csv",
+          "lines": [
+            {
+              "x_field": "year_month",
+              "y_field": "value",
+              "color": "black",
+              "drawstyle": "steps-post"
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-scatter-d": {
+      "class": "bivar",
+      "size": "S",
+      "height": 60,
+      "ylim": [-60, 2100],
+      "xlim": [-60, 2100],
+      "gs_left": 0.5,
+      "gs_right": 0.98,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "scatter_d-Austria.csv",
+          "lines": [
+            {
+              "x_data": [0, 3000],
+              "y_data": [0, 3000],
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "zorder": 3
+            }
+          ],
+          "points": [
+            {
+              "x_field": "p",
+              "y_field": "q",
+              "color": "navy",
+              "marker": ".",
+              "zorder": 3,
+              "alpha": 0.8,
+              "edgecolors": "none"
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-scatter-c": {
+      "class": "bivar",
+      "size": "S",
+      "height": 60,
+      "ylim": [-60, 2100],
+      "xlim": [-60, 2100],
+      "gs_left": 0.5,
+      "gs_right": 0.98,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "scatter_c-Peru.csv",
+          "lines": [
+            {
+              "x_data": [0, 3000],
+              "y_data": [0, 3000],
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "zorder": 3
+            }
+          ],
+          "points": [
+            {
+              "x_field": "p",
+              "y_field": "q",
+              "color": "navy",
+              "marker": ".",
+              "zorder": 3,
+              "alpha": 0.8,
+              "edgecolors": "none"
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-scatter-b": {
+      "class": "bivar",
+      "size": "S",
+      "height": 60,
+      "ylim": [-60, 2100],
+      "xlim": [-60, 2100],
+      "gs_left": 0.5,
+      "gs_right": 0.98,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "scatter_b-KS.csv",
+          "lines": [
+            {
+              "x_data": [0, 3000],
+              "y_data": [0, 3000],
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "zorder": 3
+            }
+          ],
+          "points": [
+            {
+              "x_field": "p",
+              "y_field": "q",
+              "color": "navy",
+              "marker": ".",
+              "zorder": 3,
+              "alpha": 0.8,
+              "edgecolors": "none"
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-scatter-a": {
+      "class": "bivar",
+      "size": "S",
+      "height": 60,
+      "ylim": [-60, 2100],
+      "xlim": [-60, 2100],
+      "gs_left": 0.5,
+      "gs_right": 0.98,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "scatter_a-GA.csv",
+          "lines": [
+            {
+              "x_data": [0, 3000],
+              "y_data": [0, 3000],
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "zorder": 3
+            }
+          ],
+          "points": [
+            {
+              "x_field": "p",
+              "y_field": "q",
+              "color": "navy",
+              "marker": ".",
+              "zorder": 3,
+              "alpha": 0.8,
+              "edgecolors": "none"
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-relationship": {
+      "class": "bivar",
+      "size": "S",
+      "height": 80,
+      "ylim": [-60, 2100],
+      "xlim": [-60, 2100],
+      "gs_left": 0.15,
+      "gs_right": 0.98,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "Figure1-8_mean_annual_streamflow_and_precipitation.csv",
+          "lines": [
+            {
+              "x_field": "x",
+              "y_field": "y",
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "zorder": 2
+            }
+          ],
+          "points": [
+            {
+              "x_field": "mean_precipitation_mm-yr",
+              "y_field": "mean_streamflow_mm-yr",
+              "color": "navy",
+              "marker": ".",
+              "zorder": 3
+            }
+          ],
+          "annotations": [
+            {
+              "x_field": "mean_precipitation_mm-yr",
+              "y_field": "mean_streamflow_mm-yr",
+              "text_field": "State",
+              "color": "#4d4d4dff",
+              "zorder": 5,
+              "offset_x_pct": -6,
+              "offset_y_pct": 0,
+              "halo_color": "white",
+              "halo_width": 1,
+              "halo_alpha": 0.8
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-ratio-a": {
+      "class": "bivar",
+      "size": "S",
+      "height": 35,
+      "ylim": [-0.07, 1.1],
+      "xlim": [-0.07, 3],
+      "gs_left": 0.15,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "Figure1-14_a_and_b.csv",
+          "lines": [
+            {
+              "x_field": "Ep/P",
+              "y_field": "E/P lin",
+              "color": "tab:green",
+              "linestyle": "-",
+              "zorder": 3
+            },
+            {
+              "x_field": "Ep/P",
+              "y_field": "E/P non-lin",
+              "color": "tab:purple",
+              "linestyle": "-",
+              "zorder": 3
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-ratio-b": {
+      "class": "bivar",
+      "size": "S",
+      "height": 35,
+      "ylim": [-0.07, 1.1],
+      "xlim": [-0.07, 3],
+      "gs_left": 0.15,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "Figure1-14_a_and_b.csv",
+          "lines": [
+            {
+              "x_field": "Ep/P",
+              "y_field": "Q/P lin",
+              "color": "tab:green",
+              "linestyle": "-",
+              "zorder": 3
+            },
+            {
+              "x_field": "Ep/P",
+              "y_field": "Q/P non-lin",
+              "color": "tab:purple",
+              "linestyle": "-",
+              "zorder": 3
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-range": {
+      "class": "time-series",
+      "size": "S",
+      "height": 60,
+      "date_col": "Year",
+      "ylim": [-0.5, 10.5],
+      "xlim": ["1940-01-01", "1960-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.97,
+      "gs_top": 0.99,
+      "gs_bottom": 0.15,
+      "data": [
+        {
+          "path": "Figure1-24_perth_streamflow.csv",
+          "lines": [
+            {
+              "x_field": "Year",
+              "y_field": "Cumulative inflow (km3)",
+              "color": "navy",
+              "zorder": 2,
+              "xlim": ["1940-01-01", "1960-01-01"]
+            },
+            {
+              "x_field": "Year",
+              "y_field": "Cumulative release (km3)",
+              "color": "tab:blue",
+              "zorder": 3,
+              "xlim": ["1940-01-01", "1960-01-01"]
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-price": {
+      "class": "bivar",
+      "size": "S",
+      "height": 60,
+      "ylim": [-0.2, 3.9],
+      "xlim": [-70, 1050],
+      "gs_left": 0.10,
+      "gs_right": 0.99,
+      "gs_top": 0.99,
+      "gs_bottom": 0.15,
+      "data": [
+        {
+          "path": "Figure1-17_economic_analysis.csv",
+          "lines": [
+            {
+              "x_field": "Quantity S0 (M m3/yr)",
+              "y_field": "S0",
+              "color": "tab:green",
+              "zorder": 2
+            },
+            {
+              "x_field": "Quantity S1 (M m3/yr)",
+              "y_field": "S1",
+              "color": "tab:green",
+              "zorder": 2
+            },
+            {
+              "x_field": "Quantity D0 (M m3/yr)",
+              "y_field": "D0",
+              "color": "purple",
+              "zorder": 3
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-peru-b": {
+      "class": "time-series",
+      "size": "M",
+      "height": 40,
+      "date_col": "year",
+      "ylim": [-70, 1550],
+      "xlim": ["1961-01-01", "2021-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "data": [
+        {
+          "path": "Figure1-20_gurk_precip.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "mm-yr",
+              "color": "steelblue",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_mm-yr",
+              "color": "#4d4d4dff",
+              "linestyle": "--"
+            }
+          ]
+        },
+        {
+          "path": "Figure1-20_gurk_streamflow.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "mm-yr",
+              "color": "navy",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_mm-yr",
+              "color": "#4d4d4dff",
+              "linestyle": "--"
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-peru-a": {
+      "class": "time-series",
+      "size": "M",
+      "height": 40,
+      "date_col": "year",
+      "ylim": [-70, 1550],
+      "xlim": ["1961-01-01", "2021-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "data": [
+        {
+          "path": "Figure1-20_letrayoc_precip.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "mm-yr",
+              "color": "steelblue",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_mm-yr",
+              "color": "#4d4d4dff",
+              "linestyle": "--"
+            }
+          ]
+        },
+        {
+          "path": "Figure1-20_letrayoc_streamflow.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "mm-yr",
+              "color": "navy",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_mm-yr",
+              "color": "#4d4d4dff",
+              "linestyle": "--"
+            }
+          ]
+        }
+      ]
+    },
     "C01-mtx-buddyko-b": {
       "class": "bivar",
       "size": "S",

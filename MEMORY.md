@@ -1,5 +1,14 @@
 # MEMORY
 
+## 2026-06-30 (SVG export docs)
+
+- Updated docs in `views.py` and `plot_figures.py` to cover SVG export feature.
+  - `Plotter._save_figure`: added docstring — writes two files: raster (`self.suffix`, default `jpeg`) + companion `.svg` at the same path.
+  - `Plotter._setup_fig`: docstring updated — notes that `svg.fonttype = 'none'` is set so SVG fonts render as editable text, not paths.
+  - `Plotter` class docstring: "Saving" bullet updated to mention raster + SVG.
+  - Module header (`views.py`): `Plotter` description and Notes section updated with dual-output and SVG fonttype details.
+  - `plot_figures.py` header: "Key paths" extended with output file line (`<name>.jpeg + <name>.svg`); step 7 in Behaviour updated to say "saves both a JPEG and a companion SVG".
+
 ## 2026-06-30 (continued)
 
 - Added header docstrings to all 14 modules. Replaced `"""Head docs"""` placeholders in

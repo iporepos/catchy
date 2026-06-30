@@ -25,8 +25,10 @@ Key classes and functions
     Base plotter. Handles spec loading from a JSON file, CSV data ingestion
     via ``spec["data"]`` entries, figure setup through the ``plans.viewer``
     library (``build_fig`` / ``ship_fig``), and save/close orchestration.
-    Subclasses override :meth:`Plotter._draw` to provide rendering logic.
-    The default :meth:`_draw` implementation is a random-scatter stub.
+    Each write produces two output files: a raster image (``self.suffix``,
+    default ``"jpeg"``) and a companion SVG. Subclasses override
+    :meth:`Plotter._draw` to provide rendering logic. The default
+    :meth:`_draw` implementation is a random-scatter stub.
 
 :func:`load_spec`
     Reads a JSON spec file from disk and returns it as a :class:`dict`.
@@ -60,6 +62,10 @@ Notes
     - Output files are written to ``FIGURES_DIR / "raw"`` by default.
       Override ``output_root`` before calling :meth:`Plotter.run` to
       redirect output.
+    - Each write produces two files: a raster image (``self.suffix``,
+      default ``"jpeg"``) and a companion ``<name>.svg``. The SVG uses
+      ``svg.fonttype = 'none'`` (set in :meth:`Plotter._setup_fig`) so
+      fonts are embedded as editable text rather than converted to paths.
     - ``Plotter.write`` defaults to ``True``, unlike the CLI-driven
       ``Script`` subclasses where ``-w`` must be passed explicitly.
     - Font registration via :func:`_register_helvetica` only searches the
@@ -118,7 +124,8 @@ class Plotter:
         - Spec loading
         - Data ingestion
         - Figure lifecycle
-        - Saving / closing
+        - Saving: raster image (jpeg by default) + companion SVG
+        - Closing
     Delegates drawing to subclasses.
     """
 
@@ -195,7 +202,9 @@ class Plotter:
 
         Calls ``plans.viewer.build_fig`` (which applies the wien style), then
         overrides the font family to Helvetica before axes are added so that
-        all subsequent text elements use the catchy font.
+        all subsequent text elements use the catchy font. Also sets
+        ``svg.fonttype`` to ``'none'`` so SVG exports embed fonts as editable
+        text rather than converting them to paths.
         """
         specs = self.get_view_specs()
         # setup fig
@@ -216,6 +225,12 @@ class Plotter:
         self.output_file = Path(self.output_root) / s
 
     def _save_figure(self):
+        """
+        Resolve the output path and write two files: the raster image
+        (``self.suffix``, default ``"jpeg"``) and a companion SVG at the same
+        path with the ``.svg`` extension. ``output_root`` is created if it
+        does not exist.
+        """
         self._set_output_file()
         self.output_file.parent.mkdir(parents=True, exist_ok=True)
         # ship fig image

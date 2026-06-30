@@ -59,12 +59,14 @@ For each figure to be processed:
 5. Call ``plot.run()``.
 6. **Safe mode** (no ``-w``): call ``plt.show()`` then ``plt.close()`` — renders
    interactively without writing any file.
-7. **Write mode** (``-w``): ``plot.run()`` saves the file and closes the figure.
+7. **Write mode** (``-w``): ``plot.run()`` saves both a JPEG and a companion
+   SVG, then closes the figure.
 
 Key paths
 ---------
     Spec file:   HERE / "data" / "specs.json"  (shipped with the repository)
     Output root: FIGURES_DIR / <chapter> / "plots"  (resolved from chapter key; created on first write)
+    Output files: <name>.jpeg + <name>.svg  (both written by :meth:`~catchy.views.Plotter._save_figure` in write mode)
 
 Dependencies
 ------------

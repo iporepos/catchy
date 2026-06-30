@@ -29,6 +29,12 @@ publish_src        →  deploy source figure folders
 publish_main       →  deploy main-text figure folders
 ```
 
+**Data figure pipeline (independent track):**
+
+```
+plot_figures       →  render data-based figures from repo/data/specs.json
+```
+
 **Supporting infrastructure (not run directly):**
 
 ```
@@ -270,6 +276,33 @@ python publish_main.py  # always writes — no dry-run available
 
 > [!WARNING]
 > **Re-run: safe but no dry-run.** Same caveat as `publish_src` — no safe mode available.
+
+---
+
+### `plot_figures`
+
+Renders data-based figures using the plot-type registry from `plots.py`. Reads
+`repo/data/specs.json` (shipped with the repository), which groups figure specs under
+`chapter<NN>` keys. For each figure, instantiates the registered plotter, resolves data
+paths from `DATA_DIR / "plots" / <chapter>`, and writes output to
+`FIGURES_DIR / <chapter> / "plots"` (created automatically on first write).
+
+This is an independent pipeline, separate from the SVG illustration workflow. Run it
+whenever data-based figures need to be regenerated.
+
+```bash
+python plot_figures.py [--chapter <N>|all] [--figure <name>] [-w]
+
+# examples
+python plot_figures.py                                    # show all figures interactively
+python plot_figures.py --chapter 1                        # show chapter 1 figures only
+python plot_figures.py --chapter 1 -w                     # write mode, all chapter 1 figures
+python plot_figures.py --figure C01-mtx-georgia-a -w      # single figure, write mode
+python plot_figures.py --chapter all -w                   # write all chapters
+```
+
+> [!TIP]
+> **Re-run: safe.** Write mode overwrites output files deterministically. Safe mode (no `-w`) renders each figure and opens it in an interactive window — no files are written. Each window must be closed before the next figure is displayed.
 
 ---
 

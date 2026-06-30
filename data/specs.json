@@ -1,16 +1,17 @@
 {
-  "C01-mtx-georgia-a": {
-    "class": "time-series",
-    "size": "L",
-    "height": 30,
-    "date_col": "year",
-    "ylim": [-0.3e+09, 4.5e+09],
-    "xlim": ["1950-01-01", "2020-01-01"],
-    "gs_left": 0.05,
-    "gs_top": 0.85,
-    "data": [
+  "chapter01": {
+    "C01-mtx-georgia-a": {
+      "class": "time-series",
+      "size": "L",
+      "height": 30,
+      "date_col": "year",
+      "ylim": [-0.3e+09, 4.5e+09],
+      "xlim": ["1950-01-01", "2020-01-01"],
+      "gs_left": 0.05,
+      "gs_top": 0.85,
+      "data": [
         {
-          "path": "chapter01/Figure1-3_annual_streamflow_m3-yr_GA.csv",
+          "path": "Figure1-3_annual_streamflow_m3-yr_GA.csv",
           "lines": [
             {
               "x_field": "year",
@@ -27,17 +28,17 @@
           ]
         }
       ]
-  },
-  "C01-mtx-georgia-b": {
-    "class": "time-series",
-    "size": "L",
-    "height": 50,
-    "date_col": "year",
-    "ylim": [-0.3e+09, 4.5e+09],
-    "xlim": ["1950-01-01", "2020-01-01"],
-    "data": [
+    },
+    "C01-mtx-georgia-b": {
+      "class": "time-series",
+      "size": "L",
+      "height": 50,
+      "date_col": "year",
+      "ylim": [-0.3e+09, 4.5e+09],
+      "xlim": ["1950-01-01", "2020-01-01"],
+      "data": [
         {
-          "path": "chapter01/Figure1-3_annual_streamflow_m3-yr_KS.csv",
+          "path": "Figure1-3_annual_streamflow_m3-yr_KS.csv",
           "lines": [
             {
               "x_field": "year",
@@ -54,5 +55,6 @@
           ]
         }
       ]
+    }
   }
 }

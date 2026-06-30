@@ -5,7 +5,7 @@ tests/data/outputs
 bench*
 # Pycharm stuff
 .idea
-
+scripts/
 .claude
 CLAUDE.md
 

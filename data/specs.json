@@ -1,14 +1,122 @@
 {
   "chapter01": {
+    "C01-mtx-buddyko-b": {
+      "class": "bivar",
+      "size": "S",
+      "height": 30,
+      "ylim": [-0.1, 1.1],
+      "xlim": [-0.1, 3],
+      "gs_left": 0.08,
+      "gs_right": 0.90,
+      "gs_top": 0.98,
+      "gs_bottom": 0.12,
+      "data": [
+        {
+          "path": "Figure1-12_right.csv",
+          "lines": [
+            {
+              "x_field": "Budyko X",
+              "y_field": "Budyko Y",
+              "color": "purple",
+              "zorder": 2
+            },
+            {
+              "x_field": "Water-Energy Limitation X",
+              "y_field": "Water-Energy Limitation Y",
+              "color": "black",
+              "zorder": 3
+            }
+          ],
+          "points": [
+            {
+              "x_field": "Point X",
+              "y_field": "Point Y",
+              "color": "tab:blue",
+              "marker": ".",
+              "zorder": 4
+            }
+          ],
+          "annotations": [
+            {
+              "x_field": "Point X",
+              "y_field": "Point Y",
+              "text_field": "Point names",
+              "color": "#4d4d4dff",
+              "zorder": 5,
+              "offset_x_pct": -0.5,
+              "offset_y_pct": 1.8,
+              "halo_color": "white",
+              "halo_width": 1,
+              "halo_alpha": 0.8
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-buddyko-a": {
+      "class": "bivar",
+      "size": "S",
+      "height": 30,
+      "ylim": [-0.1, 1.1],
+      "xlim": [-0.1, 3],
+      "gs_left": 0.08,
+      "gs_right": 0.90,
+      "gs_top": 0.98,
+      "gs_bottom": 0.12,
+      "data": [
+        {
+          "path": "Figure1-12_left.csv",
+          "lines": [
+            {
+              "x_field": "Budyko X",
+              "y_field": "Budyko Y",
+              "color": "purple",
+              "zorder": 2
+            },
+            {
+              "x_field": "Water-Energy Limitation X",
+              "y_field": "Water-Energy Limitation Y",
+              "color": "black",
+              "zorder": 3
+            }
+          ],
+          "points": [
+            {
+              "x_field": "Point X",
+              "y_field": "Point Y",
+              "color": "tab:blue",
+              "marker": ".",
+              "zorder": 4
+            }
+          ],
+          "annotations": [
+            {
+              "x_field": "Point X",
+              "y_field": "Point Y",
+              "text_field": "Point names",
+              "color": "#4d4d4dff",
+              "zorder": 5,
+              "offset_x_pct": -0.5,
+              "offset_y_pct": 1.8,
+              "halo_color": "white",
+              "halo_width": 1,
+              "halo_alpha": 0.8
+            }
+          ]
+        }
+      ]
+    },
     "C01-mtx-georgia-a": {
       "class": "time-series",
-      "size": "L",
-      "height": 30,
+      "size": "M",
+      "height": 40,
       "date_col": "year",
-      "ylim": [-0.3e+09, 4.5e+09],
+      "ylim": [-0.3, 4.5],
       "xlim": ["1950-01-01", "2020-01-01"],
-      "gs_left": 0.05,
-      "gs_top": 0.85,
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
       "data": [
         {
           "path": "Figure1-3_annual_streamflow_m3-yr_GA.csv",
@@ -17,13 +125,15 @@
               "x_field": "year",
               "y_field": "m3-yr",
               "color": "navy",
-              "drawstyle": "steps-post"
+              "drawstyle": "steps-post",
+              "y_division": 1000000000
             },
             {
               "x_field": "year",
               "y_field": "m3-yr_average",
-              "color": "tab:gray",
-              "linestyle": "--"
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "y_division": 1000000000
             }
           ]
         }
@@ -31,11 +141,15 @@
     },
     "C01-mtx-georgia-b": {
       "class": "time-series",
-      "size": "L",
-      "height": 50,
+      "size": "M",
+      "height": 40,
       "date_col": "year",
-      "ylim": [-0.3e+09, 4.5e+09],
+      "ylim": [-0.3, 4.5],
       "xlim": ["1950-01-01", "2020-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
       "data": [
         {
           "path": "Figure1-3_annual_streamflow_m3-yr_KS.csv",
@@ -44,13 +158,284 @@
               "x_field": "year",
               "y_field": "m3-yr",
               "color": "navy",
-              "drawstyle": "steps-post"
+              "drawstyle": "steps-post",
+              "y_division": 1000000000
             },
             {
               "x_field": "year",
               "y_field": "m3-yr_average",
-              "color": "tab:gray",
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "y_division": 1000000000
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-georgia2-a": {
+      "class": "time-series",
+      "size": "M",
+      "height": 40,
+      "date_col": "year",
+      "ylim": [-70, 2300],
+      "xlim": ["1950-01-01", "2020-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "data": [
+        {
+          "path": "Figure1-5_annual_precipitation_corrected_GA.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "mm-year",
+              "color": "steelblue",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "mm-year_average",
+              "color": "#4d4d4dff",
               "linestyle": "--"
+            }
+          ]
+        },
+        {
+          "path": "Figure1-5_annual_streamflow_usgs_GA.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "mm-year",
+              "color": "navy",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "mm-year_average",
+              "color": "#4d4d4dff",
+              "linestyle": "--"
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-georgia2-b": {
+      "class": "time-series",
+      "size": "M",
+      "height": 40,
+      "date_col": "year",
+      "ylim": [-70, 2300],
+      "xlim": ["1950-01-01", "2020-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "data": [
+        {
+          "path": "Figure1-5_annual_precipitation_corrected_KS.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "mm-year",
+              "color": "steelblue",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "mm-year_average",
+              "color": "#4d4d4dff",
+              "linestyle": "--"
+            }
+          ]
+        },
+        {
+          "path": "Figure1-5_annual_streamflow_usgs_KS.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "mm-year",
+              "color": "navy",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "mm-year_average",
+              "color": "#4d4d4dff",
+              "linestyle": "--"
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-inflows-a": {
+      "class": "time-series",
+      "size": "M",
+      "height": 40,
+      "date_col": "year",
+      "ylim": [-70, 2700],
+      "xlim": ["1911-01-01", "2011-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "data": [
+        {
+          "path": "Figure1-16_rainfall_mm-yr_Jarrahdale.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "rainfall_mm-yr",
+              "color": "steelblue",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_1911_1974",
+              "color": "green",
+              "linestyle": "-",
+              "xlim": ["1911-01-01", "1975-01-01"]
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_1975_2011",
+              "color": "purple",
+              "linestyle": "-",
+              "xlim": ["1975-01-01", "2011-01-01"]
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_2001_2011",
+              "color": "tab:red",
+              "linestyle": "-",
+              "xlim": ["2001-01-01", "2011-01-01"]
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-inflows-b": {
+      "class": "time-series",
+      "size": "M",
+      "height": 40,
+      "date_col": "year",
+      "ylim": [-70, 1100],
+      "xlim": ["1911-01-01", "2011-01-01"],
+      "gs_left": 0.10,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "data": [
+        {
+          "path": "Figure1-16_inflow_GL-yr_PerthDams.csv",
+          "lines": [
+            {
+              "x_field": "year",
+              "y_field": "inflow_GL-yr",
+              "color": "navy",
+              "drawstyle": "steps-post"
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_1911_1974",
+              "color": "green",
+              "linestyle": "-",
+              "xlim": ["1911-01-01", "1975-01-01"]
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_1975_2011",
+              "color": "purple",
+              "linestyle": "-",
+              "xlim": ["1975-01-01", "2011-01-01"]
+            },
+            {
+              "x_field": "year",
+              "y_field": "average_2001_2011",
+              "color": "tab:red",
+              "linestyle": "-",
+              "xlim": ["2001-01-01", "2011-01-01"]
+            }
+
+          ]
+        }
+      ]
+    },
+    "C01-mtx-linear-a": {
+      "class": "bivar",
+      "size": "S",
+      "height": 35,
+      "ylim": [-70, 1100],
+      "xlim": [-70, 1550],
+      "gs_left": 0.45,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "Figure1-21_a.csv",
+          "lines": [
+            {
+              "x_field": "Precipitation (mm/yr)",
+              "y_field": "x",
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "zorder": 3
+            },
+            {
+              "x_field": "Precipitation (mm/yr)",
+              "y_field": "Q2(x)",
+              "color": "navy",
+              "linestyle": "-",
+              "zorder": 5
+            },
+            {
+              "x_field": "Precipitation (mm/yr)",
+              "y_field": "E12(x)",
+              "color": "orangered",
+              "linestyle": "-",
+              "zorder": 4
+            }
+          ]
+        }
+      ]
+    },
+    "C01-mtx-linear-b": {
+      "class": "bivar",
+      "size": "S",
+      "height": 35,
+      "ylim": [-70, 1100],
+      "xlim": [-70, 1550],
+      "gs_left": 0.45,
+      "gs_right": 0.975,
+      "gs_top": 0.98,
+      "gs_bottom": 0.1,
+      "aspect": "equal",
+      "data": [
+        {
+          "path": "Figure1-21_b.csv",
+          "lines": [
+            {
+              "x_field": "Precipitation (mm/yr)",
+              "y_field": "x",
+              "color": "#4d4d4dff",
+              "linestyle": "--",
+              "zorder": 3
+            },
+            {
+              "x_field": "Precipitation (mm/yr)",
+              "y_field": "Q1(x)",
+              "color": "navy",
+              "linestyle": "-",
+              "zorder": 5
+            },
+            {
+              "x_field": "Precipitation (mm/yr)",
+              "y_field": "E11(x)",
+              "color": "orangered",
+              "linestyle": "-",
+              "zorder": 4
             }
           ]
         }

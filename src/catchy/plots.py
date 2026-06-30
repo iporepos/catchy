@@ -60,7 +60,10 @@ Notes
 
 import pprint
 import pandas as pd
+from matplotlib.mlab import angle_spectrum
+
 from catchy.views import Plotter
+import matplotlib.patheffects as pe
 
 # --------------------------------------------------
 # SIMPLE REGISTRY
@@ -113,26 +116,28 @@ class PlotTimeSeries(Plotter):
         return df
 
     def _draw(self):
-
         ax = self.axes[0]
-        # first data
-
         dc = self.spec["data"]
 
-        i = 0
-        for ds in dc:
+        for i, ds in enumerate(dc):
             df = self.data[i]
 
-            lines = ds["lines"]
+            lines = ds.get("lines", [])
             for line in lines:
                 x = line.get("x_field", "date")
                 y = line.get("y_field", "Y")
                 c = line.get("color", "black")
                 linestyle = line.get("linestyle", "-")
                 drawstyle = line.get("drawstyle", None)
-                ax.plot(df[x], df[y], color=c, linestyle=linestyle, drawstyle=drawstyle)
 
-            i = i + 1
+                line_df = df
+                line_xlim = line.get("xlim", None)
+                if line_xlim:
+                    lo, hi = pd.to_datetime(line_xlim[0]), pd.to_datetime(line_xlim[1])
+                    line_df = df[(df[self.date_col] >= lo) & (df[self.date_col] <= hi)]
+
+                y_values = line_df[y] / line.get("y_division", 1)
+                ax.plot(line_df[x], y_values, color=c, linestyle=linestyle, drawstyle=drawstyle)
 
         ylim = self.spec.get("ylim", None)
         if ylim:
@@ -141,6 +146,102 @@ class PlotTimeSeries(Plotter):
         xlim = self.spec.get("xlim", None)
         if xlim:
             ax.set_xlim(pd.to_datetime(xlim))
+
+@register_plot("bivar")
+class PlotBivar(Plotter):
+
+    def __init__(self, name, specs):
+        super().__init__(name, specs)
+
+    def _draw(self):
+        ax = self.axes[0]
+        dc = self.spec["data"]
+
+        # set limits first so annotation offsets are computed against final ranges
+        ylim = self.spec.get("ylim", None)
+        if ylim:
+            ax.set_ylim(ylim)
+
+        xlim = self.spec.get("xlim", None)
+        if xlim:
+            ax.set_xlim(xlim)
+
+        for i, ds in enumerate(dc):
+            df = self.data[i]
+
+            # ---------------------------------------
+            # LINES
+            for line in ds.get("lines", []):
+                x = line.get("x_field", "X")
+                y = line.get("y_field", "Y")
+                c = line.get("color", "black")
+                linestyle = line.get("linestyle", "-")
+                drawstyle = line.get("drawstyle", "default")
+                zorder = line.get("zorder", 0)
+                ax.plot(df[x], df[y], color=c, linestyle=linestyle,
+                         drawstyle=drawstyle, zorder=zorder)
+
+            # ---------------------------------------
+            # POINTS
+            for scatter in ds.get("points", []):
+                x = scatter.get("x_field", "X")
+                y = scatter.get("y_field", "Y")
+                c = scatter.get("color", "black")
+                marker = scatter.get("marker", "o")
+                zorder = scatter.get("zorder", 0)
+                ax.scatter(df[x], df[y], color=c, marker=marker, zorder=zorder)
+
+            # ---------------------------------------
+            # ANNOTATIONS
+            for text in ds.get("annotations", []):
+                x = text.get("x_field", "X")
+                y = text.get("y_field", "Y")
+                tfield = text.get("text_field", "label")
+                c = text.get("color", "black")
+                zorder = text.get("zorder", 0)
+
+                # offsets as % of axes range, converted to data units
+                off_x_pct = text.get("offset_x_pct", 0)
+                off_y_pct = text.get("offset_y_pct", 0)
+                x0, x1 = ax.get_xlim()
+                y0, y1 = ax.get_ylim()
+                dx = (x1 - x0) * (off_x_pct / 100.0)
+                dy = (y1 - y0) * (off_y_pct / 100.0)
+
+                ha = text.get("ha", "left")
+                va = text.get("va", "bottom")
+                fontsize = text.get("fontsize", 5)
+
+                halo_color = text.get("halo_color", None)
+                halo_width = text.get("halo_width", 2)
+                halo_alpha = text.get("halo_alpha", 0.7)
+
+                path_effects = None
+                if halo_color:
+                    path_effects = [pe.withStroke(linewidth=halo_width, foreground=halo_color, alpha=halo_alpha)]
+
+                for _, row in df.iterrows():
+                    label = row[tfield]
+                    if pd.isna(label):
+                        continue
+                    px, py = row[x], row[y]
+                    ax.annotate(
+                        str(label),
+                        xy=(px, py),
+                        xytext=(px + dx, py + dy),
+                        textcoords="data",
+                        color=c,
+                        zorder=zorder,
+                        ha=ha,
+                        va=va,
+                        fontsize=fontsize,
+                        path_effects=path_effects,
+                    )
+        # ylim/xlim already applied above
+
+        aspect = self.spec.get("aspect", None)
+        if aspect:
+            ax.set_aspect(aspect)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,80 @@
 """
-Head docs
+Reformat SVG Sizes
+==================
+
+Corrects layer matrix transforms and sets canonical pixel widths on frame
+elements for all active SVG figure files in a chapter.
+
+Architectural context
+---------------------
+Sits in the SVG reformat pipeline after :mod:`reformat_svg_fonts` and before
+:mod:`reformat_svg_flags`. Subclasses :class:`catchy.core.Script`, inheriting
+CLI parsing, write-gate confirmation, and chapter iteration. Reads figure
+metadata from Markdown note files under ``FIGURES_DIR`` and applies SVG
+mutations in-place via ``FigureSVG.save()``.
+
+Usage
+-----
+Run directly::
+
+    python reformat_svg_sizes.py --chapter 3
+    python reformat_svg_sizes.py --chapter all -w
+
+Write mode (``-w``) is required for mutations to be saved; omitting it
+enters safe mode and no files are touched.
+
+Behaviour
+---------
+For every active ``.svg`` file paired with a chapter figure note
+(``C*-*-*.md``):
+
+1. **Discover notes** — globs ``FIGURES_DIR/<chapter>/C*-*-*.md`` and loads
+   them into a :class:`NoteCollFigure` collection.
+2. **Filter** — excludes notes with ``status == 'stand-by'``; only active
+   figures are processed.
+3. **Fix layer scale** — calls :func:`fix_layer_scale` on the ``"frames"``
+   layer, resetting matrix scale components to 1 while preserving any
+   translation offsets. No-ops if the layer is absent or the scale is already
+   correct.
+4. **Set frame widths** — for each size code present as an element ID in
+   ``"frames"`` (``L``, ``M``, ``S``), sets the ``width`` property to the
+   canonical pixel value defined in :data:`DC_NEW_WIDTHS`.
+5. **Save** — writes mutations back to the original ``.svg`` file.
+
+Module-level constants
+----------------------
+:data:`DC_NEW_WIDTHS`
+    Maps size codes to canonical pixel widths: ``L=172``, ``M=126``,
+    ``S=83.5``.
+
+:func:`fix_layer_scale`
+    Standalone helper that parses a ``matrix(a,b,c,d,e,f)`` transform on the
+    named layer and resets the scale components (``a``, ``d``) to 1, preserving
+    translation (``e``, ``f``) and shear (``b``, ``c``). Handles only
+    ``matrix()`` form; ``scale()`` and ``translate()`` forms are left untouched.
+    Safe to call on files without a transform attribute.
+
+Key paths
+---------
+* Input notes : ``FIGURES_DIR/<chapter>/C*-*-*.md``
+* SVG files   : co-located with each note (same stem, ``.svg`` extension)
+
+Dependencies
+------------
+* ``losalamos.notes.NoteCollFigure`` — figure note collection loader
+* ``losalamos.figures.FigureSVG``    — SVG read/mutate/save wrapper
+* ``catchy.core.Script``             — base class; provides ``--chapter``
+                                      CLI, write gate, and ``run()``
+
+Notes
+-----
+* SVG files are mutated **in-place** with no backup step. Run under
+  version control or take manual backups before bulk processing.
+* The class in this module is named ``ScriptReformatFonts`` — a copy-paste
+  artifact; the correct name should be ``ScriptReformatSizes``.
+* Notes with ``status == 'stand-by'`` are silently skipped.
+* If zero notes are found for the chapter, the method returns early with
+  a warning and no files are touched.
 """
 
 import re

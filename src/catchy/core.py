@@ -2,14 +2,76 @@
 Core Module
 ===========
 
-This module establishes the foundational configuration, directory paths, and
-base scripting functionalities for the project.
+Foundation for the entire catchy library. Loads project configuration from
+``config.local.json`` at import time, exposes directory path constants used by
+all pipeline scripts, and provides the :class:`Script` base class that every
+processing script subclasses.
 
-It dynamically loads local configurations from ``config.local.json`` to set up
-essential path constants (e.g., base directories, figures, documents, data).
-Additionally, it provides the base :class:`Script` class to handle common
-Command-Line Interface (CLI) operations, user confirmation gates, standard
-logging, and chapter-wise execution flows.
+Architectural context
+---------------------
+No internal catchy dependencies — this module is imported (usually via
+``from catchy.core import *``) by every other module in the package.
+Configuration is read once at import time from ``config.local.json``, which
+must exist at the repository root.
+
+Exported constants
+------------------
+:data:`HERE`
+    Absolute path to the repository root (three parents above this file).
+:data:`BASE_DIR`
+    Root of the project data tree, from ``config["base_dir"]``.
+:data:`STD_OUTPUT`
+    Staging folder for intermediate outputs, from ``config["std_output"]``.
+:data:`CHAPTER_START`, :data:`CHAPTER_END`
+    Integer bounds for the full chapter range, used by ``--chapter all``.
+:data:`FIGURES_DIR`
+    ``BASE_DIR / "figures/main"`` — root for all chapter figure notes and SVGs.
+:data:`CAPTIONS_DIR`
+    ``FIGURES_DIR / "captions"``.
+:data:`DOCUMENTS_DIR`
+    ``BASE_DIR / "documents"`` — root for LaTeX catalog output.
+:data:`CATALOG_DIR`
+    ``BASE_DIR / "Catalogue"``.
+:data:`DATA_DIR`
+    ``BASE_DIR / "data"`` — root for CSV data files used by plotters.
+:data:`PREFIX_PUB_MAIN`, :data:`PREFIX_PUB_SRC`
+    Publish prefix strings for main-text and source figure trees.
+:data:`NOTE_PATTERN`
+    Glob pattern ``"C*-*-*.md"`` matching all figure note filenames.
+:data:`LOG_PREFIX`
+    Format string ``"cathy @ {}:"`` used to build per-script log labels.
+:data:`FIGS_PREFIXES`
+    Maps collection names to title prefixes:
+    ``cover`` / ``main text`` → ``"Figure"``,
+    ``box`` → ``"Box"``,
+    ``biography`` → ``"Biography"``.
+
+Key class
+---------
+:class:`Script`
+    Base class for all pipeline scripts. Provides ``--chapter`` / ``-w`` CLI
+    argument parsing, write-mode gating with an interactive confirmation
+    prompt, ``print_info`` / ``print_step`` / ``print_warn`` logging helpers,
+    chapter iteration over a list resolved from ``--chapter all``, and
+    ``set_src_dir()`` for resolving the per-chapter figures directory.
+    Subclasses override :meth:`Script.processing` with their specific logic.
+
+Dependencies
+------------
+    Standard library only: ``argparse``, ``glob``, ``json``, ``os``,
+    ``pathlib``, ``re``, ``shutil``, ``pprint``, ``time``.
+
+Notes
+-----
+    - ``config.local.json`` must exist at repository root before any import.
+      Missing or malformed config raises a ``FileNotFoundError`` or
+      ``KeyError`` at import time.
+    - All path constants are resolved as absolute :class:`pathlib.Path`
+      objects. Downstream code can use them directly without further
+      resolution.
+    - The wildcard ``from catchy.core import *`` import used by script
+      modules brings ``glob``, ``shutil``, ``pprint``, ``Path``, and all
+      constants into the caller's namespace alongside the ``Script`` class.
 """
 
 # IMPORTS

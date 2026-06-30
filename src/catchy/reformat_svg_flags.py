@@ -1,5 +1,70 @@
 """
-Head docs
+Reformat SVG Flags
+==================
+
+Appends a processing-complete marker to the ``comment`` field of each active
+figure note's YAML front-matter, signalling that the SVG has been through the
+full reformat pipeline and is ready for fine-tune adjustment.
+
+Architectural context
+---------------------
+Sits at the end of the SVG reformat pipeline, after
+:mod:`reformat_svg_fonts` and :mod:`reformat_svg_sizes`. Subclasses
+:class:`catchy.core.Script`, inheriting CLI parsing, write-gate confirmation,
+and chapter iteration. Reads and writes Markdown note files directly via
+:class:`losalamos.notes.NoteFigure`.
+
+Usage
+-----
+Run directly::
+
+    python reformat_svg_flags.py --chapter 3
+    python reformat_svg_flags.py --chapter all -w
+
+Write mode (``-w``) is required for note saves; omitting it enters safe mode
+and no files are touched.
+
+Behaviour
+---------
+For every active figure note (``C*-*-*.md``, ``status != 'stand-by'``) in the
+chapter:
+
+1. **Discover notes** — globs ``FIGURES_DIR/<chapter>/C*-*-*.md`` and loads
+   them into a :class:`NoteCollFigure` collection.
+2. **Filter** — excludes notes with ``status == 'stand-by'``.
+3. **Check flag** — reads the ``comment`` metadata field. If :data:`FLAG`
+   is already present, the note is skipped entirely.
+4. **Append flag** — concatenates :data:`FLAG` to the existing comment string
+   and writes it back to the note's ``comment`` field.
+5. **Save** — calls ``NoteFigure.save()`` to persist the updated front-matter.
+
+Module-level constants
+----------------------
+:data:`FLAG`
+    The marker string appended to the ``comment`` field.
+    Current value: ``">>> Ipo@2026-06 SVG Reformatted. T2 fine-tune adjust
+    margins and symbols"``.
+
+Key paths
+---------
+* Input / output notes : ``FIGURES_DIR/<chapter>/C*-*-*.md``
+
+Dependencies
+------------
+* ``losalamos.notes.NoteCollFigure`` — figure note collection loader
+* ``losalamos.notes.NoteFigure``     — individual note read/write
+* ``catchy.core.Script``             — base class; provides ``--chapter``
+                                      CLI, write gate, and ``run()``
+
+Notes
+-----
+* Re-running is safe: the flag check prevents the marker from being
+  appended more than once per note.
+* The ``comment`` field is stripped of surrounding double-quotes before
+  the flag is appended, then the result is re-quoted when stored.
+* Notes with ``status == 'stand-by'`` are silently skipped.
+* If zero notes are found for the chapter, the method returns early with
+  a warning and no files are touched.
 """
 
 import re

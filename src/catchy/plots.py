@@ -1,3 +1,63 @@
+"""
+Plot Type Registry and Time-Series Implementation
+=================================================
+
+Provides a lightweight registry pattern for plot types and implements
+:class:`PlotTimeSeries`, the primary concrete plotter in the catchy pipeline.
+
+Architectural context
+---------------------
+Extends :mod:`catchy.views`. :class:`PlotTimeSeries` subclasses
+:class:`~catchy.views.Plotter` and is auto-registered under the key
+``"time-series"`` at import time via the :func:`register_plot` decorator.
+Additional plot types can be added in this module or others using the same
+decorator.
+
+Key classes and functions
+-------------------------
+:data:`PLOT_REGISTRY`
+    Module-level dict mapping registered plot-type names to their classes.
+    Populated at import time. Do not write to this dict directly — use
+    :func:`register_plot`.
+
+:func:`register_plot`
+    Class decorator that inserts a plot class into :data:`PLOT_REGISTRY`
+    under a given name. Raises :exc:`ValueError` on duplicate names.
+
+:func:`get_plot_class`
+    Retrieves a class from :data:`PLOT_REGISTRY` by name. Raises
+    :exc:`ValueError` if the name is not registered.
+
+:class:`PlotTimeSeries`
+    Renders date/year-based time-series from CSV data declared in a JSON
+    spec. Supports daily date columns and annual (year-only) series via
+    :meth:`handle_yearly_series`. Multiple datasets and multiple lines per
+    dataset are drawn on a single axes object.
+
+Usage
+-----
+Invoke via the ``__main__`` block, which reads a ``specs.json`` file from
+the project data directory and renders all declared plots::
+
+    python plots.py
+
+Each entry in ``specs.json`` must declare a ``"class"`` key matching a
+registered name (e.g. ``"time-series"``).
+
+Dependencies
+------------
+    catchy.views    Plotter base class
+    catchy.core     DATA_DIR (used in ``__main__`` only)
+    pandas          Date parsing and DataFrame handling
+
+Notes
+-----
+    - Importing this module is sufficient to register ``"time-series"`` in
+      :data:`PLOT_REGISTRY`; no explicit registration call is needed.
+    - Year-only series (``date_col == "year"``) are converted to
+      ``YYYY-01-01`` timestamps so they can share axes with daily series.
+"""
+
 import pprint
 import pandas as pd
 from catchy.views import Plotter

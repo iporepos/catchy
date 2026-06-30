@@ -1,3 +1,53 @@
+"""
+Plotter Base Infrastructure
+============================
+
+Base plotting infrastructure for the catchy figure pipeline. Provides the
+:class:`Plotter` class and the :func:`load_spec` utility used by all
+concrete plot modules.
+
+Architectural context
+---------------------
+Sits at the base of the plotting stack. :class:`Plotter` is subclassed by
+:mod:`catchy.plots` (and any future plot-type modules). Imports
+:data:`~catchy.core.DATA_DIR` and :data:`~catchy.core.FIGURES_DIR` from
+:mod:`catchy.core` for path resolution; has no other internal dependencies.
+
+Key classes and functions
+-------------------------
+:class:`Plotter`
+    Base plotter. Handles spec loading from a JSON file, CSV data ingestion
+    via ``spec["data"]`` entries, figure setup through the ``plans.viewer``
+    library (``build_fig`` / ``ship_fig``), and save/close orchestration.
+    Subclasses override :meth:`Plotter._draw` to provide rendering logic.
+    The default :meth:`_draw` implementation is a random-scatter stub.
+
+:func:`load_spec`
+    Reads a JSON spec file from disk and returns it as a :class:`dict`.
+
+:data:`DC_COLORS`
+    Module-level colour palette for standard variable types:
+    ``"rain"`` and ``"streamflow"``.
+
+Dependencies
+------------
+    catchy.core     DATA_DIR, FIGURES_DIR
+    plans.viewer    build_fig, ship_fig, FIG_SIZES
+    matplotlib      pyplot (figure lifecycle)
+    pandas          CSV ingestion and date handling
+    numpy           Random data used in the default _draw stub
+
+Notes
+-----
+    - :meth:`Plotter._draw` must be overridden by subclasses to produce
+      meaningful output; the stub draws random scatter data.
+    - Output files are written to ``FIGURES_DIR / "raw"`` by default.
+      Override ``output_root`` before calling :meth:`Plotter.run` to
+      redirect output.
+    - ``Plotter.write`` defaults to ``True``, unlike the CLI-driven
+      ``Script`` subclasses where ``-w`` must be passed explicitly.
+"""
+
 from catchy.core import DATA_DIR, FIGURES_DIR
 import json
 from pathlib import Path

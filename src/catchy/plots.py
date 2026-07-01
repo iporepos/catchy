@@ -99,32 +99,33 @@ class PlotTimeSeries(Plotter):
     def _load_data(self):
         super()._load_data()
         date_col = self.spec["date_col"]
-        if date_col == "year":
-            self.date_col = "year"
+        if date_col.lower() == "year":
+            self.date_col = date_col
             for i in range(len(self.data)):
-                self.data[i] = self.handle_yearly_series(df=self.data[i])
-        elif date_col == "year_month":
-            self.date_col = "date"
+                self.data[i] = self.handle_yearly_series(df=self.data[i], date_col=date_col)
+        elif date_col.lower() == "year_month":
+            self.date_col = date_col
             for i in range(len(self.data)):
-                self.data[i] = self.handle_monthly_series(df=self.data[i])
+                self.data[i] = self.handle_monthly_series(df=self.data[i], date_col=date_col)
         else:
             for i in range(len(self.data)):
                 self.data[i][self.date_col] = pd.to_datetime(
                     self.data[i][self.date_col]
                 )
 
-    def handle_monthly_series(self, df):
-        df[self.date_col] = pd.to_datetime(
+    @staticmethod
+    def handle_monthly_series(df, date_col):
+        df[date_col] = pd.to_datetime(
             df["year"].astype(str) + "-" + df["month"].astype(str).str.zfill(2) + "-01"
         )
-        df.sort_values(by=self.date_col, inplace=True)
+        df.sort_values(by=date_col, inplace=True)
         return df
 
-    def handle_yearly_series(self, df):
-        df[self.date_col] = df[self.date_col].astype(str)
-        df[self.date_col] = df[self.date_col] + "-01-01"
-        df[self.date_col] = pd.to_datetime(df[self.date_col])
-        df.sort_values(by=self.date_col, inplace=True)
+    @staticmethod
+    def handle_yearly_series(df, date_col):
+        df[date_col] = df[date_col].astype(str) + "-01-01"
+        df[date_col] = pd.to_datetime(df[date_col])
+        df.sort_values(by=date_col, inplace=True)
         return df
 
     def _draw(self):
@@ -150,6 +151,96 @@ class PlotTimeSeries(Plotter):
 
                 y_values = line_df[y] / line.get("y_division", 1)
                 ax.plot(line_df[x], y_values, color=c, linestyle=linestyle, drawstyle=drawstyle)
+
+        ylim = self.spec.get("ylim", None)
+        if ylim:
+            ax.set_ylim(ylim)
+
+        xlim = self.spec.get("xlim", None)
+        if xlim:
+            ax.set_xlim(pd.to_datetime(xlim))
+
+
+@register_plot("time-series-mix")
+class PlotTimeSeriesMix(Plotter):
+
+    def __init__(self, name, specs):
+        super().__init__(name, specs)
+        self.date_cols = []
+
+    def _load_data(self):
+        super()._load_data()
+        for i, ds in enumerate(self.spec["data"]):
+            date_col = ds["date_col"]
+            if date_col.lower() == "year":
+                self.data[i] = PlotTimeSeries.handle_yearly_series(
+                    df=self.data[i], date_col=date_col
+                )
+            elif date_col.lower() == "year_month":
+                self.data[i] = PlotTimeSeries.handle_monthly_series(
+                    df=self.data[i], date_col=date_col
+                )
+            else:
+                self.data[i][date_col] = pd.to_datetime(self.data[i][date_col])
+            self.date_cols.append(date_col)
+
+    def _draw(self):
+        ax = self.axes[0]
+        dc = self.spec["data"]
+
+        for i, ds in enumerate(dc):
+            df = self.data[i]
+            date_col = self.date_cols[i]
+
+            # ---------------------------------------
+            # ANOMALIES
+            for fill in ds.get("anomalies", []):
+                x = fill.get("x_field", "date")
+                y = fill.get("y_field", "Y")
+                c_pos = fill.get("color_pos", "steelblue")
+                c_neg = fill.get("color_neg", "firebrick")
+                alpha = fill.get("alpha", 0.8)
+                zorder = fill.get("zorder", 0)
+
+                line_df = df
+                line_xlim = fill.get("xlim", None)
+                if line_xlim:
+                    lo, hi = pd.to_datetime(line_xlim[0]), pd.to_datetime(line_xlim[1])
+                    line_df = df[(df[date_col] >= lo) & (df[date_col] <= hi)]
+
+                vals = line_df[y] / fill.get("y_division", 1)
+                ax.fill_between(
+                    line_df[x], vals, 0,
+                    where=(vals >= 0),
+                    color=c_pos, alpha=alpha, zorder=zorder,
+                    interpolate=True,
+                    linewidth=0.3,
+                )
+                ax.fill_between(
+                    line_df[x], vals, 0,
+                    where=(vals < 0),
+                    color=c_neg, alpha=alpha, zorder=zorder,
+                    interpolate=True,
+                    linewidth=0.3,
+                )
+
+            # ---------------------------------------
+            # LINES
+            for line in ds.get("lines", []):
+                x = line.get("x_field", "date")
+                y = line.get("y_field", "Y")
+                c = line.get("color", "black")
+                linestyle = line.get("linestyle", "-")
+                drawstyle = line.get("drawstyle", None)
+
+                line_df = df
+                line_xlim = line.get("xlim", None)
+                if line_xlim:
+                    lo, hi = pd.to_datetime(line_xlim[0]), pd.to_datetime(line_xlim[1])
+                    line_df = df[(df[date_col] >= lo) & (df[date_col] <= hi)]
+                zorder = line.get("zorder", 0)
+                y_values = line_df[y] / line.get("y_division", 1)
+                ax.plot(line_df[x], y_values, color=c, linestyle=linestyle, drawstyle=drawstyle, zorder=zorder)
 
         ylim = self.spec.get("ylim", None)
         if ylim:

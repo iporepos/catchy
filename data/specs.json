@@ -1,25 +1,40 @@
 {
   "chapter01": {
     "C01-mtx-soi": {
-      "class": "time-series",
+      "class": "time-series-mix",
       "size": "L",
       "height": 40,
-      "date_col": "year_month",
-      "ylim": [-70, 1550],
+      "ylim": [-3.5, 3.5],
       "xlim": ["1950-01-01", "2021-01-01"],
-      "gs_left": 0.10,
-      "gs_right": 0.975,
+      "gs_left": 0.05,
+      "gs_right": 0.995,
       "gs_top": 0.98,
       "gs_bottom": 0.1,
       "data": [
         {
-          "path": "Figure1-18_SOI_monthly_values.csv",
+          "path": "Figure1-18_SOI_annual_average.csv",
+          "date_col": "year",
           "lines": [
+            {
+              "x_field": "year",
+              "y_field": "avg",
+              "color": "black",
+              "drawstyle": "steps-post",
+              "zorder": 4
+            }
+          ]
+        },
+        {
+          "path": "Figure1-18_SOI_monthly_values.csv",
+          "date_col": "year_month",
+          "anomalies": [
             {
               "x_field": "year_month",
               "y_field": "value",
-              "color": "black",
-              "drawstyle": "steps-post"
+              "zorder": 3,
+              "color_neg": "tab:blue",
+              "color_pos": "orangered",
+              "alpha": 0.7
             }
           ]
         }

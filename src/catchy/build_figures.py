@@ -53,6 +53,10 @@ class ScriptBuildFigures(Script):
     TITLE = "BUILD IMAGES FROM SVG FILES"
     LOG_NAME = LOG_PREFIX.format("build-images")
 
+    SKIP_FIGS = [
+        "C14-mtx-walker"
+    ]
+
     DC_COLLECTIONS = {
         "cover": "cov",
         "main text": "mtx",
@@ -141,11 +145,18 @@ class ScriptBuildFigures(Script):
         # Process
         # --------------------------------------------------
         # heading_subsection(msg="Render SVG")
+        ls_skipped = []
         self.print_info(f"rendering SVGs ...")
         for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="file"):
 
             f = Path(row["note_file"])
-            fsvg = f.parent / f"{f.stem}.svg"
+            fig_name = f.stem
+
+            if fig_name in self.SKIP_FIGS:
+                ls_skipped.append(fig_name)
+                continue
+
+            fsvg = f.parent / f"{fig_name}.svg"
 
             if not fsvg.is_file():
                 continue
@@ -179,6 +190,10 @@ class ScriptBuildFigures(Script):
                 time.sleep(0.01)
 
         self.send_to_drive()
+
+        if len(ls_skipped) > 0:
+            self.print_warn(msg="Some files were skipped:")
+            pprint.pp(ls_skipped)
 
         self.print_step("Done")
         return None

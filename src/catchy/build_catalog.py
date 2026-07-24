@@ -118,6 +118,7 @@ from tqdm import tqdm
 import pandas as pd
 
 from losalamos.notes import NoteCollFigure
+from losalamos.documents import DocumentTeX
 from losalamos.paths import FOLDER_TEMPLATES_DOCUMENTS
 from losalamos.tools.core import *
 
@@ -213,7 +214,7 @@ class ScriptBuildCatalog(Script):
 
         # load template
         self.print_info(f"{chn} -- loading template ...")
-        f_template = FOLDER_TEMPLATES_DOCUMENTS / "/tex/_catalog_figure.tex"
+        f_template = FOLDER_TEMPLATES_DOCUMENTS / "tex/_catalog_figure.tex"
 
         with f_template.open("r", encoding="utf-8") as f:
             content = f.read()
@@ -610,6 +611,14 @@ class ScriptBuildCatalog(Script):
             s = s.replace("^", " ")
             s = remove_non_ascii(s)
             return s
+
+    def run(self):
+        super().run()
+        MAIN_FILE = DOCUMENTS_DIR / "catalog/main.tex"
+        tex = DocumentTeX()
+        tex.load_data(MAIN_FILE)
+        tex.to_pdf()
+
 
 
 if __name__ == "__main__":

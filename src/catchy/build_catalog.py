@@ -559,9 +559,9 @@ class ScriptBuildCatalog(Script):
         sz = dc.get("size")
         dc_sizes = {
             "XS": "30 mm",
-            "S": "81 mm",
-            "M": "120 mm",
-            "L": "170 mm",
+            "S": "83.5 mm",
+            "M": "126 mm",
+            "L": "172 mm",
             "XL": "210 mm",
         }
         s = ""
@@ -578,9 +578,9 @@ class ScriptBuildCatalog(Script):
         w = self.get_width(dc)
 
         if w == "210 mm":
-            s = "170 mm"
+            s = "172 mm"
         elif w == r"\colorbox{YellowOrange}{undefined}":
-            s = "120 mm"
+            s = "126 mm"
         else:
             s = w
 

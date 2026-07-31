@@ -166,25 +166,32 @@ class ScriptBuildFigures(Script):
 
             if self.write:
 
-                current_opacity = 1
-                is_not_box = True
+                # PDF building
+                self.build_pdf(f.stem, svg, row, opacity=0)
 
-                if row["collection"] == "box":
-                    current_opacity = 0
-                    is_not_box = False
-
-                # pdf building
-                self.build_pdf(f.stem, svg, row, opacity=current_opacity)
-
-                # image building
+                # JPEG building
                 self.build_image(
                     f.stem,
                     svg,
                     row,
-                    build_jpeg=is_not_box,
-                    delete_png=is_not_box,
-                    opacity=current_opacity,
+                    build_jpeg=True,
+                    delete_png=True,
+                    opacity=1,
                 )
+
+                if row["collection"] == "box":
+
+                    # JPEG + PNG building
+                    self.build_image(
+                        f.stem,
+                        svg,
+                        row,
+                        build_jpeg=False,
+                        delete_png=False,
+                        opacity=0,
+                    )
+
+
 
             else:
                 time.sleep(0.01)

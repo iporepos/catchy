@@ -614,10 +614,18 @@ class ScriptBuildCatalog(Script):
 
     def run(self):
         super().run()
+
+        # Build TeX document
         MAIN_FILE = DOCUMENTS_DIR / "catalog/main.tex"
         tex = DocumentTeX()
         tex.load_data(MAIN_FILE)
         tex.to_pdf()
+
+        # Rename output file
+        MAIN_FILE_PDF = DOCUMENTS_DIR / "catalog/main.pdf"
+        MAIN_FILE_PDF_NEW = DOCUMENTS_DIR / "catalog/catalog.pdf"
+        if MAIN_FILE_PDF.exists():
+            os.rename(MAIN_FILE_PDF, MAIN_FILE_PDF_NEW)
 
 
 

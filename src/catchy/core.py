@@ -292,7 +292,7 @@ class Script:
         self.src_dir = FIGURES_DIR / cnm
 
     def processing(self):
-        print("okok")
+        print("ok")
 
 
 if __name__ == "__main__":

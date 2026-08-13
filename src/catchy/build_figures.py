@@ -39,6 +39,13 @@ class ScriptBuildFigures(Script):
     specific collection types (like 'cover', 'main text', 'box') and manages
     the final deployment of generated images to the correct output directories.
 
+    A single figure may also be targeted directly via ``--figure``, passing
+    its label (e.g. ``"C01-mtx-hydro"``). Since the chapter is always encoded
+    as the leading ``C<nn>`` token of the label, :meth:`set_arguments`
+    injects it into ``args.chapter`` automatically, so ``--chapter`` is not
+    required in that mode (an explicit ``--chapter`` is still respected if
+    given alongside ``--figure``).
+
     :cvar TITLE: The display title of the script.
     :type TITLE: str
     :cvar LOG_NAME: Standard prefix for logging, specific to the build-images process.
@@ -48,13 +55,18 @@ class ScriptBuildFigures(Script):
 
     :ivar collection: The specific figure collection targeted for processing (defaults to "all").
     :vartype collection: str
+    :ivar figure: The label of a single figure to build (e.g. "C01-mtx-hydro"), or None.
+    :vartype figure: str or None
     """
 
     TITLE = "BUILD IMAGES FROM SVG FILES"
     LOG_NAME = LOG_PREFIX.format("build-images")
 
+    # Applies only to batch runs (--collection). An explicit --figure
+    # request always overrides this list, since naming a figure directly
+    # is a stronger signal of intent than the blanket skip.
     SKIP_FIGS = [
-        "C14-mtx-walker"
+        "C14-mtx-walker",
     ]
 
     DC_COLLECTIONS = {
@@ -68,32 +80,74 @@ class ScriptBuildFigures(Script):
     def __init__(self):
         super().__init__()
         self.collection = None
+        self.figure = None
 
     def get_parser(self):
         parser = super().get_parser()
 
         parser.add_argument("--collection", default="all", help="Collection")
+        parser.add_argument(
+            "--figure",
+            default=None,
+            help=(
+                "Build a single figure by its label (e.g. 'C01-mtx-hydro'). "
+                "The chapter is inferred from the label's leading 'C<nn>' "
+                "token, so --collection is ignored when this is set."
+            ),
+        )
 
         return parser
 
     def set_arguments(self, args):
         super().set_arguments(args)
         self.collection = args.collection
+        self.figure = args.figure
+
+        # Script.run() reads args.chapter right after this method returns,
+        # via the same Namespace object, and crashes if it's None. A
+        # --figure label already encodes its chapter (e.g. "C01-mtx-hydro"
+        # -> chapter 1), so fill it in here unless the user passed
+        # --chapter explicitly.
+        if self.figure and not args.chapter:
+            args.chapter = self.get_chapter_from_label(self.figure)
+
+    @staticmethod
+    def get_chapter_from_label(label):
+        """
+        Extracts the chapter number encoded in a figure label.
+
+        Figure labels follow the pattern ``C<chapter>-<collection>-<name>``,
+        e.g. ``"C01-mtx-hydro"`` encodes chapter 1. This parses the leading
+        ``C``-prefixed token and returns it as an integer.
+
+        :param label: The figure label (e.g. ``"C01-mtx-hydro"``).
+        :type label: str
+        :returns: The chapter number.
+        :rtype: int
+        """
+        token = label.split("-")[0]
+        return int(token.lstrip("Cc"))
 
     def processing(self):
         """
-        Executes the main figure rendering workflow for the current chapter.
+        Executes the main figure rendering workflow.
 
-        This method discovers relevant markdown notes based on the chosen collection,
-        loads them into a metadata catalog, filters the notes by workflow status,
-        and iterates over the filtered list to export the associated SVG files
-        into raster images. Finally, it triggers the distribution of these files
-        to the target drive.
+        When ``self.figure`` is set, targets a single note directly (its
+        chapter, already resolved onto ``self.current_chapter`` in
+        :meth:`set_arguments`, comes from the label) and skips status
+        filtering, since an explicitly named figure should be built
+        regardless of its 'concluded'/'pending' status. Otherwise, discovers
+        notes for the current chapter and chosen collection, loads them into
+        a metadata catalog, filters by status, and iterates over the
+        filtered list to export the associated SVG files into raster
+        images. Finally, it triggers the distribution of these files to the
+        target drive.
 
         :returns: None
         """
         c_n = self.current_chapter
-        self.set_src_dir(c_n=self.current_chapter)
+
+        self.set_src_dir(c_n=c_n)
 
         nc = NoteCollFigure()
 
@@ -101,13 +155,19 @@ class ScriptBuildFigures(Script):
         # Discover notes
         # --------------------------------------------------
 
-        col = self.DC_COLLECTIONS[self.collection]
-
         chn = self.get_chapter_folder_name(c_n)
-        ls_notes = list(FIGURES_DIR.glob(f"./{chn}/C*-{col}-*.md"))
+
+        if self.figure:
+            ls_notes = list(FIGURES_DIR.glob(f"./{chn}/{self.figure}.md"))
+        else:
+            col = self.DC_COLLECTIONS[self.collection]
+            ls_notes = list(FIGURES_DIR.glob(f"./{chn}/C*-{col}-*.md"))
 
         if len(ls_notes) == 0:
-            self.print_warn("WARNING >>> 0 notes found")
+            if self.figure:
+                self.print_warn(f"WARNING >>> figure '{self.figure}' not found")
+            else:
+                self.print_warn("WARNING >>> 0 notes found")
             return None
 
         # --------------------------------------------------
@@ -129,11 +189,16 @@ class ScriptBuildFigures(Script):
 
         df_full = nc.catalog.copy()
 
-        df = df_full.copy()
-        df_sub_1 = df.query("status == 'concluded'").copy()
-        df_sub_2 = df[df["status"].str.contains("pending", na=False)]
+        if self.figure:
+            # a single figure was explicitly requested — build it regardless
+            # of its concluded/pending status
+            df = df_full.copy()
+        else:
+            df = df_full.copy()
+            df_sub_1 = df.query("status == 'concluded'").copy()
+            df_sub_2 = df[df["status"].str.contains("pending", na=False)]
 
-        df = pd.concat([df_sub_1, df_sub_2]).reset_index(drop=True)
+            df = pd.concat([df_sub_1, df_sub_2]).reset_index(drop=True)
 
         self.print_info(f"{len(df)} notes filtered.")
 
@@ -152,7 +217,7 @@ class ScriptBuildFigures(Script):
             f = Path(row["note_file"])
             fig_name = f.stem
 
-            if fig_name in self.SKIP_FIGS:
+            if fig_name in self.SKIP_FIGS and not self.figure:
                 ls_skipped.append(fig_name)
                 continue
 

@@ -257,6 +257,10 @@ class ScriptBuildCatalog(Script):
         "all": "*",
     }
 
+    def set_arguments(self, args):
+        super().set_arguments(args=args)
+        self.compile = args.compile
+
     def processing(self):
         c_n = self.current_chapter
         self.set_src_dir(c_n=self.current_chapter)

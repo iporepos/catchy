@@ -1,0 +1,1020 @@
+% =========================================================================
+% config.tex -- master configuration for the BOOK layout
+% -------------------------------------------------------------------------
+% Mirrors config_manuscript.tex: same package set (where relevant) and the
+% SAME custom-command NAMES, so a manuscript chapter needs only its call
+% PARAMETERS updated (done by transform_manuscript.py), not its structure.
+%
+% Everything that is "a number you might want to iterate on" is exposed as
+% a \newcommand near the top of the relevant section. Change it here once.
+% =========================================================================
+
+% -----------------------------------------------------------------------
+% Packages  (same family as config_manuscript.tex)
+% -----------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{array}
+\usepackage[english]{babel}
+\usepackage{hyperref}   % must load before cleveref
+\usepackage{cleveref}
+\usepackage{xstring}
+\usepackage{geometry}
+\usepackage{mdframed}
+\usepackage{tcolorbox}       % styled coloured boxes
+  \tcbuselibrary{skins, breakable}
+\usepackage{tikz}            % needed for \bookcropimage (bio portrait center-crop)
+\usepackage{xcolor}
+\newif\ifbooksoulloaded
+\IfFileExists{soul.sty}{\usepackage{soul}\booksoulloadedtrue}{\booksoulloadedfalse}
+\ifbooksoulloaded\else\providecommand{\hl}[1]{\textcolor{red}{#1}}\fi
+\usepackage{setspace}
+\usepackage{microtype}
+\usepackage[shortlabels]{enumitem}
+\usepackage{ragged2e}
+% Fonts
+\usepackage{helvet}
+\usepackage{times}
+\usepackage{titlesec}   % section/chapter title formatting
+\usepackage{eurosym}
+\usepackage{changepage}
+\usepackage{wasysym}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{eso-pic}    % full-bleed cover image
+\usepackage{multicol}   % balanced spoiler columns on the chapter cover
+\IfFileExists{lipsum.sty}{\usepackage{lipsum}}{} % blind text for mockups
+\usepackage{stfloats}   % REQUIRED: allows [b] placement for full-width
+                        % (figure*/table*) floats -- standard LaTeX supports
+                        % only [t]/[p] for those. The take-home box, the
+                        % biography box and L-size bottom figures all need it.
+
+% Editorial line numbering, kept for parity with the manuscript config but
+% OFF by default in the book layout. Flip \booklinenumberstrue to turn on.
+\usepackage{lineno}
+\renewcommand{\linenumberfont}{\normalfont\tiny\sffamily\color{gray}}
+\newif\ifbooklinenumbers
+\booklinenumbersfalse
+\ifbooklinenumbers\AtBeginDocument{\linenumbers}\fi
+
+
+
+\newcommand{\degree}{\ensuremath{{}^{\circ}}}
+\newcommand{\authornote}[1]{\hl{[Author note: #1]}}
+
+% Set sans-serif font
+\renewcommand{\sfdefault}{phv} % phv=Helvetica
+
+
+% =========================================================================
+% 1. PAGE GEOMETRY -- page size, columns, margins. All explicit, editable.
+%    (Heading/paragraph/float spacing lives in section 3, not here.)
+% =========================================================================
+
+% ---- Page size -----------------------------------------------------------
+\newcommand{\bookpagewidth}{216mm}
+\newcommand{\bookpageheight}{276mm}
+
+% ---- Two-column text block ------------------------------------------------
+\newcommand{\bookcolwidth}{83.5mm}     % single column width
+\newcommand{\bookcolsep}{5mm}          % gap between columns
+\newcommand{\booktextwidth}{172mm}     % = 2*colwidth + colsep (172 = 2*83.5+5)
+
+% ---- Lateral margins (symmetric; derived from page/text width) -----------
+% (\bookpagewidth - \booktextwidth) / 2 = (216-172)/2 = 22mm
+\newcommand{\booklatmargin}{22mm}
+
+% ---- Vertical margins ------------------------------------------------------
+\newcommand{\booktopblank}{5mm}       % blank strip above the header box
+\newcommand{\bookheadheight}{7mm}      % height of the header text box
+\newcommand{\bookheadsep}{3mm}         % gap between header rule and body text
+% total top margin to first text line = 16+7+2 = 25mm (matches spec)
+\newcommand{\booktopmargintotal}{25mm}
+\newcommand{\bookbottommargin}{20mm}   % blank strip below body text (no footer)
+
+\setlength{\columnsep}{\bookcolsep}
+
+% `includehead` makes `top` measure from the paper edge to the TOP OF THE
+% HEADER, so the header lives INSIDE the top margin (as specified):
+%   0 .. 16mm      blank
+%   16 .. 23mm     header text box (\bookheadheight)
+%   23 .. 25mm     headsep
+%   25mm           first body line   (= \booktopmargintotal)
+\geometry{
+  paperwidth   = \bookpagewidth,
+  paperheight  = \bookpageheight,
+  left         = \booklatmargin,
+  right        = \booklatmargin,
+  top          = \booktopblank,
+  headheight   = \bookheadheight,
+  headsep      = \bookheadsep,
+  includehead,
+  bottom       = \bookbottommargin,
+  footskip     = 1pt,
+  twoside,
+}
+
+% Text body tab / paragraph indent (same names as manuscript config).
+% Paragraph VERTICAL spacing (\parskip) is set in section 3.
+\newcommand{\bodytab}{10mm}
+\setlength{\parindent}{4mm}
+\linespread{1.0}
+
+
+% =========================================================================
+% 2. COLOURS
+% =========================================================================
+\definecolor{maintextcolor}{RGB}{33,30,31}
+\definecolor{headingcolor}{RGB}{42, 110, 184}
+\definecolor{boxcolor}{RGB}{244, 247, 252}
+\definecolor{bookcovernumcolor}{RGB}{205,205,205}
+\definecolor{bookcovercapcolor}{RGB}{111,111,111}
+
+% -----------------------------------------------------------------------
+% Part-dependent box colour
+% -----------------------------------------------------------------------
+% Part 1: Chapters 0-5   -> light blue
+% Part 2: Chapters 6-9   -> light green
+% Part 3: Chapters 10-15 -> light amber
+\definecolor{boxcolorpart1}{RGB}{244, 247, 252}
+\definecolor{boxcolorpart2}{RGB}{238, 252, 250}
+\definecolor{boxcolorpart3}{RGB}{252, 246, 238}
+
+\newcommand{\boxcolor}{%
+  \ifnum\value{chapter}<6
+    \colorlet{boxcolorcurrent}{boxcolorpart1}%
+  \else\ifnum\value{chapter}<10
+    \colorlet{boxcolorcurrent}{boxcolorpart2}%
+  \else
+    \colorlet{boxcolorcurrent}{boxcolorpart3}%
+  \fi\fi
+}
+\colorlet{boxcolorcurrent}{boxcolorpart1} % safe default before first \boxcolor call
+
+% Header rule (full page width; colour/thickness parameterised)
+\colorlet{headerrulecolor}{headingcolor}
+\newcommand{\headerrulethickness}{1.5pt}
+
+\usepackage[font={footnotesize,sf}, labelfont={bf,color=headingcolor}, labelsep=quad]{caption}
+
+
+% =========================================================================
+% 3. HEADINGS, PARAGRAPHS & FLOAT SPACING
+% -------------------------------------------------------------------------
+% SIMPLE APPROACH, ON PURPOSE: every before/after space below is a single
+% plain \newcommand you can edit directly -- no measuring, no rounding, no
+% automatic snapping. \bookvunit is kept only as a convenient unit to write
+% values in (e.g. "1.5\bookvunit" reads as "one and a half body-text
+% lines") -- it is NOT read back or used to compute anything automatically.
+% If two-column pages drift out of alignment at the bottom, that is a
+% separate, later problem to solve downstream (e.g. by hand-tuning the
+% values here per chapter, or picking values that happen to be exact
+% multiples of \bookvunit) -- this section does not attempt to solve it
+% for you automatically.
+% =========================================================================
+
+% ---- 3.1  Grid unit (convenience only, not auto-applied) ------------------
+\newlength{\bookvunit}
+\AtBeginDocument{\setlength{\bookvunit}{\baselineskip}}
+
+% ---- 3.2  Heading spacing: BEFORE and AFTER, all editable here ------------
+\newcommand{\bookspacebeforesection}{1.5\bookvunit}
+\newcommand{\bookspaceaftersection}{0.5\bookvunit}
+
+\newcommand{\bookspacebeforesubsection}{1.2\bookvunit}
+\newcommand{\bookspaceaftersubsection}{0.4\bookvunit}
+
+\newcommand{\bookspacebeforesubsubsection}{1.0\bookvunit}
+\newcommand{\bookspaceaftersubsubsection}{0.3\bookvunit}
+
+% Paragraph (run-in heading): before is vertical, after is a horizontal
+% gap between the bold label and the text that follows on the same line.
+\newcommand{\bookspacebeforeparagraph}{1.0\bookvunit}
+\newcommand{\bookspaceafterparagraph}{0.5em}
+
+% ---- 3.3  Paragraph vertical spacing (regular body paragraphs) ------------
+\newcommand{\bookparskip}{0.0\bookvunit}
+\AtBeginDocument{\setlength{\parskip}{\bookparskip}}
+
+% ---- 3.4  Numbering depth & label formats ---------------------------------
+\setcounter{secnumdepth}{3}
+\renewcommand{\thesubsubsection}{(\alph{subsubsection})}
+
+% ---- 3.5  Label box widths per level, editable here ------------------------
+% \thesection is short ("1", "12"); \thesubsection is wider ("1.2",
+% "12.10"); \thesubsubsection is short again ("(a)", "(b)"). Each level
+% gets its own box width so the number never crowds the title text.
+\newcommand{\booksecnumwidth}{2.2em}
+\newcommand{\booksubsecnumwidth}{3.2em}
+\newcommand{\booksubsubsecnumwidth}{2.6em}
+
+% ---- 3.6  Chapter (kept minimal/unused) ------------------------------------
+% Unlike the manuscript, the BOOK chapter heading is not auto-printed by
+% \chapter (see \startchapter in section 5) -- it is hand-composed on the
+% chapter's "first page" (\chapterfirstpage, section 7) so it can sit
+% beside the chapter-number box.
+\titleformat{\chapter}[block]{}{}{0pt}{}
+
+% ---- 3.7  Section ----------------------------------------------------------
+\titleformat{\section}[block]
+  {\bfseries\fontfamily{phv}\selectfont\large\color{headingcolor}}
+  {\makebox[\booksecnumwidth][l]{\thesection}}
+  {0pt}
+  {}
+\titlespacing*{\section}
+  {0pt}{\bookspacebeforesection}{\bookspaceaftersection}
+
+% ---- 3.8  Subsection -------------------------------------------------------
+\titleformat{\subsection}[block]
+  {\bfseries\fontfamily{phv}\selectfont\normalsize\color{headingcolor}}
+  {\makebox[\booksubsecnumwidth][l]{\thesubsection}}
+  {0pt}
+  {}
+\titlespacing*{\subsection}
+  {0pt}{\bookspacebeforesubsection}{\bookspaceaftersubsection}
+
+% ---- 3.9  Subsubsection -----------------------------------------------------
+\titleformat{\subsubsection}[block]
+  {\bfseries\fontfamily{phv}\selectfont\small\color{headingcolor}}
+  {\makebox[\booksubsubsecnumwidth][l]{\thesubsubsection}}
+  {0pt}
+  {}
+\titlespacing*{\subsubsection}
+  {0pt}{\bookspacebeforesubsubsection}{\bookspaceaftersubsubsection}
+
+% ---- 3.10  Paragraph (run-in heading) ---------------------------------------
+\titleformat{\paragraph}[runin]
+  {\bfseries\fontfamily{phv}\selectfont\small\color{maintextcolor}}
+  {}
+  {0pt}
+  {}
+\titlespacing*{\paragraph}
+  {0pt}{\bookspacebeforeparagraph}{\bookspaceafterparagraph}
+
+% ---- 3.11  Float spacing (figures, tables, boxes) ---------------------------
+% Standard LaTeX registers controlling space AROUND floats. All exposed
+% here as named, editable commands rather than being buried in defaults.
+%   \bookfloatsep      -- space BETWEEN two floats stacked on the same
+%                          page (e.g. two figures both placed at [t]).
+%   \booktextfloatsep   -- space BETWEEN a float and the body text next to
+%                          it on the same page (e.g. below a [t] figure,
+%                          above a [b] figure).
+%   \bookintextsep       -- space above/below an in-text (non-float-page)
+%                          float when it interrupts the running text.
+\newcommand{\bookfloatsep}{0.25\bookvunit}
+\newcommand{\booktextfloatsep}{0.5\bookvunit}
+\newcommand{\bookintextsep}{1.0\bookvunit}
+\AtBeginDocument{%
+  \setlength{\floatsep}{\bookfloatsep}%
+  \setlength{\textfloatsep}{\booktextfloatsep}%
+  \setlength{\intextsep}{\bookintextsep}%
+  \setlength{\dblfloatsep}{\bookfloatsep}%
+  \setlength{\dbltextfloatsep}{\booktextfloatsep}%
+}
+
+% ---- 3.12  Body text color / links ------------------------------------------
+\color{maintextcolor}
+
+\hypersetup{
+  colorlinks  = true,
+  linkcolor   = maintextcolor,
+  citecolor   = blue!60!black,
+  urlcolor    = blue!60!black,
+}
+
+
+% =========================================================================
+% 4. PAGE STYLE / HEADERS  (header only, no footer)
+% -------------------------------------------------------------------------
+% LEFT (even) page:  "<page num, bold> | Chapter <N>  <chapter short name>"
+%                     left-aligned at the outer (left) margin.
+% RIGHT (odd) page:  "<section num> <section title> | <page num, bold>"
+%                     right-aligned at the outer (right) margin.
+% Both fully in \headingcolor.
+% =========================================================================
+
+% Page number: bold, headingcolor (used on both sides).
+\newcommand{\bookheadpage}[1]{\sffamily\scriptsize\bfseries\color{headingcolor}#1}
+
+% Running section mark: captures BOTH the section number and title so the
+% header can format them together ("2.3  Light Reactions") without relying
+% on \rightmark's default uppercase behaviour. Fed by \sectionmark below.
+\makeatletter
+\newcommand{\booksectionmarkstore}{}
+\renewcommand{\sectionmark}[1]{%
+  \renewcommand{\booksectionmarkstore}{\thesection\ \ #1}%
+  \markright{#1}% keep \rightmark populated too, for anything else relying on it
+}
+\makeatother
+
+\fancypagestyle{bookheader}{%
+  \fancyhf{}%
+  % ---- Left (even) page: page number | Chapter N  short name ------------
+  \fancyhead[LE]{%
+    \sffamily\scriptsize\color{headingcolor}%
+    \bookheadpage{\thepage}\quad\textbar\quad\mdseries Chapter~\thechapter\ \ \bookchaptershortstore%
+  }%
+  % ---- Right (odd) page: section num  title | page number ----------------
+  \fancyhead[RO]{%
+    \sffamily\scriptsize\color{headingcolor}%
+    \booksectionmarkstore\quad\textbar\quad\bookheadpage{\thepage}%
+  }%
+  \renewcommand{\headrulewidth}{\headerrulethickness}%
+  \renewcommand{\headrule}{%
+    \hspace*{-\booklatmargin}%
+    {\color{headerrulecolor}\rule[0pt]{\bookpagewidth}{\headerrulethickness}}%
+  }%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+\pagestyle{bookheader}
+
+% Cover pages get no header/rule/page-number at all.
+\fancypagestyle{bookcover}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\headrule}{}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+
+\makeatletter
+\newcommand{\bookchaptershortstore}{}
+\newcommand{\chaptershortname}[1]{\renewcommand{\bookchaptershortstore}{#1}}
+\newcommand{\bookchaptertitlestore}{}
+\makeatother
+
+
+% =========================================================================
+% 5. CHAPTER-START-ON-EVEN-PAGE  (parameterised)
+% =========================================================================
+% Toggle which parity chapters open on. Default: EVEN, per spec.
+\newif\ifchapterstartseven
+\chapterstartseventrue
+
+\makeatletter
+\newcommand{\cleartoevenpage}{%
+  \clearpage
+  \if@twoside
+    \ifodd\c@page
+      \hbox{}\thispagestyle{empty}\newpage
+      \if@twocolumn\hbox{}\thispagestyle{empty}\newpage\fi
+    \fi
+  \fi
+}
+\newcommand{\cleartooddpage}{%
+  \clearpage
+  \if@twoside
+    \ifodd\c@page\else
+      \hbox{}\thispagestyle{empty}\newpage
+      \if@twocolumn\hbox{}\thispagestyle{empty}\newpage\fi
+    \fi
+  \fi
+}
+\newcommand{\clearchapterpage}{\ifchapterstartseven\cleartoevenpage\else\cleartooddpage\fi}
+\makeatother
+
+% Registers the chapter (counter, ToC, running marks, resets figure/table/
+% equation counters) WITHOUT printing anything -- the visible heading is
+% hand-built by \chaptercover / \chapterfirstpage below.
+\makeatletter
+\newcommand{\startchapter}[1]{%
+  \clearchapterpage
+  \refstepcounter{chapter}%
+  \renewcommand{\bookchaptertitlestore}{#1}%
+  \renewcommand{\bookchaptershortstore}{#1}% default; override with \chaptershortname
+  \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}%
+  \markboth{#1}{}%
+  \boxcolor
+  \setcounter{workedexample}{0}%
+}
+% Preface / unnumbered front matter (still registers a ToC entry + marks,
+% but is not counted against the part-colour chapter numbering).
+\newcommand{\startchapterstar}[1]{%
+  \clearchapterpage
+  \renewcommand{\bookchaptertitlestore}{#1}%
+  \renewcommand{\bookchaptershortstore}{#1}%
+  \addcontentsline{toc}{chapter}{#1}%
+  \markboth{#1}{}%
+  \boxcolor
+}
+\makeatother
+
+
+% =========================================================================
+% 6. CHAPTER COVER PAGE  (opening page: full-bleed image + number/caption
+%    bar + two-column "in this chapter" spoiler)
+% =========================================================================
+\newcommand{\bookcoverimageheight}{160mm}   % full-bleed photo height (from page top)
+\newcommand{\bookcoverbarheight}{32mm}      % number/caption bar height -- tie to font below
+\newcommand{\bookcovernumwidth}{32mm}       % number box width (kept ~= bar height => "square-ish")
+\newcommand{\bookcovernumfont}{\fontsize{70}{75}\selectfont}
+\newcommand{\bookcovercapwidth}{137mm}
+\newcommand{\bookcovergaptobar}{4mm}        % gap: bar -> spoiler container
+\newcommand{\bookcoverlabelgap}{3mm}        % gap: "In this chapter..." label -> columns
+\newcommand{\bookcoverspoilerheight}{70mm}  % FIXED total height of the spoiler container
+\newcommand{\bookcovercapspread}{1.3}
+
+% Full-bleed cover photograph. Tries T1 first, then T0, each across
+% pdf -> png -> jpeg -> jpg:
+%   ./figures/chapter{NN}/T1/{label}_T1.(pdf|png|jpeg|jpg)
+%   ./figures/chapter{NN}/T0/{label}_T0.(pdf|png|jpeg|jpg)
+%
+% IMPORTANT (fixes two earlier bugs):
+%  1. The extracted chapter number is stored via \xdef into
+%     \bookcovchapnum -- a GLOBAL, fully-expanded plain-text macro. \xdef
+%     (unlike \def) fully expands its replacement text at definition time
+%     and assigns globally, so \bookcovchapnum reliably holds the plain
+%     digits (e.g. "01") in every scope that reads it afterwards, instead
+%     of silently reverting to undefined once a local \StrLeft/\StrRight
+%     group closes.
+%  2. \bookcovchapnum is used with NO shared "whole path" macro name
+%     (no \coverfigbaseT1/\coverfigbaseT0) -- every path is written out in
+%     full at each \IfFileExists/\includegraphics call, so there is
+%     nothing left for a chapter file to collide with by redefining a
+%     same-named macro elsewhere.
+\makeatletter
+\newcommand{\makecoverimage}[1]{%
+  \StrLeft{#1}{3}[\covtmpA]\StrRight{\covtmpA}{2}[\covtmpB]%
+  \xdef\bookcovchapnum{\covtmpB}%
+  \AddToShipoutPictureBG*{%
+  \AtPageUpperLeft{\raisebox{-\bookcoverimageheight}{%
+    \IfFileExists{./figures/chapter\bookcovchapnum/T1/#1_T1.pdf}{%
+      \includegraphics[width=\bookpagewidth,height=\bookcoverimageheight]{./figures/chapter\bookcovchapnum/T1/#1_T1.pdf}%
+    }{\IfFileExists{./figures/chapter\bookcovchapnum/T1/#1_T1.png}{%
+      \includegraphics[width=\bookpagewidth,height=\bookcoverimageheight]{./figures/chapter\bookcovchapnum/T1/#1_T1.png}%
+    }{\IfFileExists{./figures/chapter\bookcovchapnum/T1/#1_T1.jpeg}{%
+      \includegraphics[width=\bookpagewidth,height=\bookcoverimageheight]{./figures/chapter\bookcovchapnum/T1/#1_T1.jpeg}%
+    }{\IfFileExists{./figures/chapter\bookcovchapnum/T1/#1_T1.jpg}{%
+      \includegraphics[width=\bookpagewidth,height=\bookcoverimageheight]{./figures/chapter\bookcovchapnum/T1/#1_T1.jpg}%
+    }{\IfFileExists{./figures/chapter\bookcovchapnum/T0/#1_T0.pdf}{%
+      \includegraphics[width=\bookpagewidth,height=\bookcoverimageheight]{./figures/chapter\bookcovchapnum/T0/#1_T0.pdf}%
+    }{\IfFileExists{./figures/chapter\bookcovchapnum/T0/#1_T0.png}{%
+      \includegraphics[width=\bookpagewidth,height=\bookcoverimageheight]{./figures/chapter\bookcovchapnum/T0/#1_T0.png}%
+    }{\IfFileExists{./figures/chapter\bookcovchapnum/T0/#1_T0.jpeg}{%
+      \includegraphics[width=\bookpagewidth,height=\bookcoverimageheight]{./figures/chapter\bookcovchapnum/T0/#1_T0.jpeg}%
+    }{\IfFileExists{./figures/chapter\bookcovchapnum/T0/#1_T0.jpg}{%
+      \includegraphics[width=\bookpagewidth,height=\bookcoverimageheight]{./figures/chapter\bookcovchapnum/T0/#1_T0.jpg}%
+    }{%
+      \colorbox{gray!25}{\parbox[b][\bookcoverimageheight][c]{\bookpagewidth}{%
+        \centering\sffamily\large\color{gray!60}[cover photo: #1]}}%
+    }}}}}}}}%
+  }}%
+}%
+  % Reserve the part of the image that intrudes into the normal text block.
+  % The text block already starts \booktopmargintotal below the page top, so
+  % only the remainder has to be pushed down.
+  \rule{0pt}{\dimexpr\bookcoverimageheight-\booktopmargintotal\relax}\par
+}
+\makeatother
+
+% Number / caption bar directly beneath the cover photo. Occupies exactly
+% \bookpagewidth (full page bleed for the background colour) but keeps its
+% CONTENT (number + caption) constrained within \booktextwidth, matching
+% the rest of the book's text block:
+%   [ \booklatmargin | number zone | caption \bookcovercapwidth | \booklatmargin ]
+% Caption is right-aligned within the text block, justified, in
+% \bookcovercapcolor with no paragraph indent. Number occupies whatever
+% text-width space remains to the left of the caption, centred within
+% that zone, in \bookcovernumcolor. Both cells share ONE background colour
+% (\boxcolorcurrent, the current part colour) so the bar reads as a single
+% continuous full-width band with no internal seam.
+\newsavebox{\bookcovercapbox}
+\newlength{\bookcoverbarht}
+
+
+\newcommand{\makecoverbar}[1]{%
+  \sbox{\bookcovercapbox}{%
+    \parbox[c][][c]{\bookcovercapwidth}{%
+      \noindent \setlength{\parindent}{0pt}%
+      \linespread{\bookcovercapspread}\selectfont
+      \sffamily\footnotesize\color{bookcovercapcolor}\justifying #1}}%
+  \setlength{\bookcoverbarht}{\dimexpr\ht\bookcovercapbox+\dp\bookcovercapbox+4mm\relax}%
+  \ifdim\bookcoverbarht<\bookcoverbarheight
+    \setlength{\bookcoverbarht}{\bookcoverbarheight}%
+  \fi
+  \noindent\hspace*{-\booklatmargin}%
+  \colorbox{boxcolorcurrent}{%
+    \parbox[c][\bookcoverbarht][c]{\booklatmargin}{\hfill}% left page-margin strip, background only
+    \parbox[c][\bookcoverbarht][c]{%
+        \dimexpr\booktextwidth-\bookcovercapwidth\relax}{%
+      \centering\sffamily\bookcovernumfont\color{bookcovernumcolor}\thechapter}%
+    \parbox[c][\bookcoverbarht][c]{\bookcovercapwidth}{%
+      \usebox{\bookcovercapbox}}%
+    \parbox[c][\bookcoverbarht][c]{\booklatmargin}{\hfill}% right page-margin strip, background only
+  }%
+  \par
+}
+
+% "In this chapter ..." label -- STANDALONE single-column element,
+% width-constrained to column 1 (\bookcolwidth), sitting above the
+% multicols body instead of being its first line.
+\newcommand{\bookcoverlabel}{%
+  \parbox{\bookcolwidth}{\noindent\textit{In this chapter} \ldots}%
+}
+
+% Spoiler body text -- no longer prints the label itself.
+\newcommand{\inthischapter}[1]{%
+\noindent #1
+
+}
+
+% Full spoiler container: label, gap, then the two-column body -- all
+% inside a fixed-height \bookcoverspoilerheight parbox.
+\newcommand{\makecoverspoiler}[1]{%
+  \parbox[b][\bookcoverspoilerht][b]{\booktextwidth}{%
+    \bookcoverlabel
+
+    \vspace{\bookcoverlabelgap}
+
+    \begin{multicols}{2}
+      \inthischapter{#1}%
+    \end{multicols}
+  }%
+}
+\newlength{\bookcoverspoilerht}
+
+\newcommand{\chaptercover}[3]{%
+  \twocolumn[{%
+    \thispagestyle{bookcover}%
+    \makecoverimage{#1}%
+    \makecoverbar{#2}%
+    \vspace{\bookcovergaptobar}%
+    \setlength{\bookcoverspoilerht}{\dimexpr
+      \bookpageheight
+      -\bookbottommargin
+      -\bookcoverimageheight
+      -\bookcoverbarht
+      -\bookcovergaptobar
+    \relax}%
+    \makecoverspoiler{#3}%
+  }]%
+  \thispagestyle{bookcover}%
+  \clearpage
+}
+
+
+% =========================================================================
+% 7. CHAPTER FIRST PAGE  (title + numbered box, top; skills box top of
+%    the second column)
+% =========================================================================
+\newcommand{\bookfirstpagetitlesize}{\fontsize{24}{26}\selectfont}
+\newcommand{\bookfirstpagenumbox}{16mm}
+\newcommand{\bookfirstpagetitlegap}{10mm}
+\newcommand{\bookfirstpagenumboxwidth}{30mm}   % rectangle width
+\newcommand{\bookfirstpagenumboxheight}{35mm}  % rectangle height, from the header rule down
+
+% #1 = professional-skills content (an itemize, typically) that will sit
+% inside a \boxskills box at the top of the SECOND column.
+% The \twocolumn header block now carries ONLY the title row (title left,
+% number box right), so column 1 starts immediately beneath it instead of
+% being held down by the height of the skills box.
+%
+% The skills box is an ORDINARY single-column float, pinned to the top of
+% the page and to the SECOND column:
+%   \suppressfloats[t] clears the top of the CURRENT column only (column 1);
+%   \@topnum is restored from \topnumber at the start of every column, so
+%   column 2 is still free to take it. Declaring the float immediately after
+%   means column 2's top is the first slot available to it.
+\newcommand{\chapterfirstpage}[1]{%
+  \twocolumn[{%
+    \thispagestyle{bookheader}%
+    \vspace*{-\dimexpr\bookheadsep-0.15mm\relax}%
+    \noindent
+    \begin{minipage}[c]{\dimexpr\booktextwidth-\bookfirstpagenumboxwidth-4mm\relax}
+      \raggedright\bookfirstpagetitlesize\bfseries\fontfamily{phv}\selectfont
+      \color{headingcolor}\bookchaptertitlestore\par
+    \end{minipage}%
+    \hfill
+    \colorbox{boxcolorcurrent}{\parbox[c][\bookfirstpagenumboxheight][c]{\bookfirstpagenumboxwidth}{%
+      \centering\sffamily\bookcovernumfont\color{bookcovernumcolor}\thechapter}}%
+    \par\vspace{\bookfirstpagetitlegap}%
+  }]%
+  \thispagestyle{bookheader}%
+  \suppressfloats[t]%
+  \begin{figure}[t]
+    \begin{boxskills}
+    #1
+    \end{boxskills}
+  \end{figure}%
+}
+
+% =========================================================================
+% 8. ENDING PAGE  /  HOMEWORK PAGES
+% =========================================================================
+% boxmessages always spans both columns and sits at the bottom of the page
+% -- this is INVARIANT per spec, so it is baked into the environment and
+% chapter files need no float wrapper at the call site.
+\newtcolorbox{boxmessagesinner}{
+  myboxstyle, width=\linewidth,
+  title = {Take home messages},
+}
+
+\newenvironment{boxmessages}
+  {\onecolumn
+   \thispagestyle{bookheader}%
+   \begin{boxmessagesinner}}
+  {\end{boxmessagesinner}%
+  \vspace*{\fill}%
+   \twocolumn}
+
+% Convenience break used before the take-home box and before "Homework"
+% (\newpage only breaks columns in twocolumn mode; \clearpage guarantees
+% a fresh page, which is what the ending / homework pages need).
+\newcommand{\chapterhardbreak}{\clearpage}
+
+% =========================================================================
+% 9. FIGURES  (S = one column, L = two columns, M = 126mm + side caption)
+% =========================================================================
+% ---- Figure image-block SIZES -------------------------------------------
+% Width is fixed by the size class; HEIGHT is now also fixed, so a page's
+% vertical budget is predictable regardless of the artwork's aspect ratio
+% (and so placeholders occupy exactly the space the real image will).
+\newcommand{\bookfigwidthS}{\linewidth}   % one column
+\newcommand{\bookMfigwidth}{126mm}        % medium, side caption
+\newcommand{\bookfigwidthL}{\linewidth}   % two columns (= \booktextwidth)
+
+% Width is fixed by the size class. HEIGHT below is a PLACEHOLDER-ONLY
+% spec: it sizes the gray fallback box when no image file is found, so a
+% missing image still reserves a realistic footprint. Once a real image
+% is found, height is NOT enforced -- \bookfitimage scales it by width
+% only and lets its natural aspect ratio set the height.
+\newcommand{\bookfigheightS}{70mm}
+\newcommand{\bookfigheightM}{100mm}
+\newcommand{\bookfigheightL}{120mm}
+
+% ---- Figure caption spacing (image -> caption, and caption -> following
+% content). Applies to S and L (caption sits BELOW the image); M has a
+% SIDE caption so these skips don't apply there.
+\newcommand{\bookfigcapabove}{0.8\bookvunit}   % gap: image bottom -> caption top
+\newcommand{\bookfigcapbelow}{0.2\bookvunit}   % gap: caption bottom -> whatever follows
+
+
+% Images inside boxes / bio portraits keep their own heights.
+\newcommand{\bookfiglabelS}{S \textbar{} 83.5 $\times$ 70 mm}
+\newcommand{\bookfiglabelM}{M \textbar{} 126 $\times$ 100 mm}
+\newcommand{\bookfiglabelL}{L \textbar{} 172 $\times$ 120 mm}
+
+\newcommand{\bookboxfigheight}{45mm}
+\newcommand{\bookbiofigheight}{25mm}    % was 40mm -- now the FIXED crop height
+\newcommand{\bookbiofigwidth}{18.75mm}     % 3:4 portrait -> width = 0.75 * height
+\newcommand{\bookbiotitlegap}{3mm}   % gap: name/dates line -> body text, right pane
+\newcommand{\bookbiogap}{2mm}   % gap: image pane -> text pane
+
+
+% ---- Center-crop ("cover") loader -- fills a FIXED width x height box
+% completely, cropping any overflow evenly from the centre, instead of
+% letterboxing (\bookfitimage) or leaving height uncontrolled
+% (\bookfitimagewidth). Needs the image's OWN natural size to decide
+% which dimension to scale by, so it measures it via \sbox first.
+\newsavebox{\bookcropimgbox}
+\newlength{\bookcropimgnw}
+\newlength{\bookcropimgnh}
+\newcommand{\bookcropimage}[3]{%
+  % #1 = image path  #2 = target width  #3 = target height
+  \sbox{\bookcropimgbox}{\includegraphics{#1}}%
+  \setlength{\bookcropimgnw}{\wd\bookcropimgbox}%
+  \setlength{\bookcropimgnh}{\ht\bookcropimgbox}%
+  \begin{tikzpicture}
+    \path[use as bounding box] (0,0) rectangle (#2,#3);
+    \clip (0,0) rectangle (#2,#3);
+    \pgfmathtruncatemacro{\bookcropimgwider}{%
+      (#2/#3) > (\bookcropimgnw/\bookcropimgnh) ? 1 : 0}%
+    \ifnum\bookcropimgwider=1
+      \node[inner sep=0pt] at (0.5*#2,0.5*#3) {\includegraphics[width=#2]{#1}};
+    \else
+      \node[inner sep=0pt] at (0.5*#2,0.5*#3) {\includegraphics[height=#3]{#1}};
+    \fi
+  \end{tikzpicture}%
+}
+
+% Tier/extension fallback loader for the crop path -- SAME search order
+% (T1 -> T0, pdf -> png -> jpeg -> jpg) as \bookincludeimage, but calls
+% \bookcropimage on a hit instead of \bookfitimage.
+\newcommand{\bookincludeimagecrop}[5]{%
+  \bookincludeimagecropbase{#1}{#3}{#4}{#5}{#2}%
+}
+\newcommand{\bookincludeimagecropbase}[5]{%
+  \IfFileExists{#1.pdf}{\bookcropimage{#1.pdf}{#3}{#4}}{%
+  \IfFileExists{#1.png}{\bookcropimage{#1.png}{#3}{#4}}{%
+  \IfFileExists{#1.jpeg}{\bookcropimage{#1.jpeg}{#3}{#4}}{%
+  \IfFileExists{#1.jpg}{\bookcropimage{#1.jpg}{#3}{#4}}{%
+    \IfStrEq{#5}{}{%
+      \bookimageplaceholder{#2}{#3}{#4}{portrait}% no more bases
+    }{%
+      \bookincludeimagecropbase{#5}{#2}{#3}{#4}{}% try the other tier
+    }%
+  }}}}%
+}
+
+
+% ---- Unified image loader: TIER fallback (T1 -> T0) then EXTENSION
+% ---- fallback (pdf -> png -> jpeg -> jpg), used by every image command.
+% #1 = T1 base path (folder+filename, no extension), e.g.
+%      ./figures/chapter02/T1/C02-fig-x_T1
+% #2 = T0 base path (folder+filename, no extension), e.g.
+%      ./figures/chapter02/T0/C02-fig-x_T0
+% #3 = label shown on placeholder   #4 = target width   #5 = target height
+% #6 = human-readable size label shown on placeholder
+\newcommand{\bookincludeimage}[6]{%
+  \bookincludeimagebase{#1}{#3}{#4}{#5}{#6}{#2}%
+}
+% Tries ONE base across all 4 extensions; #6 = fallback base to try next
+% (the OTHER tier), empty {} once there is nothing left to fall back to.
+\newcommand{\bookincludeimagebase}[6]{%
+  \IfFileExists{#1.pdf}{\bookfitimage{#1.pdf}{#3}{#4}}{%
+  \IfFileExists{#1.png}{\bookfitimage{#1.png}{#3}{#4}}{%
+  \IfFileExists{#1.jpeg}{\bookfitimage{#1.jpeg}{#3}{#4}}{%
+  \IfFileExists{#1.jpg}{\bookfitimage{#1.jpg}{#3}{#4}}{%
+    \IfStrEq{#6}{}{%
+      \bookimageplaceholder{#2}{#3}{#4}{#5}% no more bases -> placeholder
+    }{%
+      \bookincludeimagebase{#6}{#2}{#3}{#4}{#5}{}% try the other tier
+    }%
+  }}}}%
+}
+
+% #3 (target height) is kept in the signature only so the call site doesn't
+% need to change -- it is now used SOLELY by \bookimageplaceholder (the
+% gray fallback box) below. Once a real image file is found, only WIDTH is
+% fixed; the image keeps its own natural aspect ratio and the slot's
+% height is whatever that produces.
+\newcommand{\bookfitimage}[3]{%
+  \parbox[t]{#2}{\centering\includegraphics[width=#2,keepaspectratio]{#1}}%
+}
+\newcommand{\bookimageplaceholder}[4]{%
+  \fbox{\parbox[c][\dimexpr#3-2\fboxsep-2\fboxrule\relax][c]{%
+        \dimexpr#2-2\fboxsep-2\fboxrule\relax}{%
+    \centering\sffamily\footnotesize\color{gray!70}
+    Figure\\#1\\[2mm]{\tiny #4}}}%
+}
+
+% Main figure command -- SAME NAME as the manuscript, extended with two
+% leading optional args: size (S/M/L, default L) and placement (t/b,
+% default t). Manuscript calls \figplaceholder{label}{name}{caption} keep
+% working unchanged (they just get the L/t default).
+% #1=size #2=pos #3=label(also used to find ./figures/chapterNN/T1|T0/#3_T1|T0.*)
+% #4=display name shown over the fallback box  #5=caption text
+%
+% Same fix as \makecoverimage above: the extracted chapter number goes
+% into a GLOBAL, fully-expanded macro (\bookfigchapnum) via \xdef, and
+% paths are written out in full at each call site -- no shared
+% \figbaseT1/\figbaseT0 macro name, so nothing to collide with.
+\NewDocumentCommand{\figplaceholder}{O{L} O{t} m m m}{%
+  \StrLeft{#3}{3}[\figtmpA]\StrRight{\figtmpA}{2}[\figtmpB]%
+  \xdef\bookfigchapnum{\figtmpB}%
+  \IfStrEq{#1}{S}{%
+    \begin{figure}[#2]
+    \centering
+    \bookincludeimage
+      {./figures/chapter\bookfigchapnum/T1/#3_T1}%
+      {./figures/chapter\bookfigchapnum/T0/#3_T0}%
+      {#4}{\bookfigwidthS}{\bookfigheightS}{\bookfiglabelS}
+    \captionsetup{aboveskip=\bookfigcapabove, belowskip=\bookfigcapbelow}%
+    \caption{#5}\label{#3}
+    \end{figure}%
+  }{%
+  \IfStrEq{#1}{M}{%
+    \begin{figure*}[#2]
+    \noindent
+    % Both minipages are [t] AND both open with \vspace{0pt}. The \vspace is
+    % what actually does the work: without it, a minipage whose first item is
+    % a box (here the fixed-height image block, a \parbox[c]) takes that box's
+    % CENTRE as its reference baseline, so the caption would sit level with
+    % the middle of the image instead of its top edge.
+    \begin{minipage}[t]{\bookMfigwidth}
+      \vspace{0pt}%
+      \centering\bookincludeimage
+        {./figures/chapter\bookfigchapnum/T1/#3_T1}%
+        {./figures/chapter\bookfigchapnum/T0/#3_T0}%
+        {#4}{\linewidth}{\bookfigheightM}{\bookfiglabelM}
+    \end{minipage}\hfill%
+    \begin{minipage}[t]{\dimexpr\booktextwidth-\bookMfigwidth-\bookcolsep\relax}
+      \vspace{0pt}%
+      \captionof{figure}{#5}\label{#3}
+    \end{minipage}
+    \end{figure*}%
+  }{%
+    \begin{figure*}[#2]
+    \centering
+    \bookincludeimage
+      {./figures/chapter\bookfigchapnum/T1/#3_T1}%
+      {./figures/chapter\bookfigchapnum/T0/#3_T0}%
+      {#4}{\bookfigwidthL}{\bookfigheightL}{\bookfiglabelL}
+    \captionsetup{aboveskip=\bookfigcapabove, belowskip=\bookfigcapbelow}%
+    \caption{#5}\label{#3}
+    \end{figure*}%
+  }}%
+}
+
+
+% Width-only image loader: fits the image to a target WIDTH only, height
+% follows naturally from the image's own aspect ratio (no keepaspectratio
+% height cap, no letterboxing). Used where the image should always visibly
+% fill the available width, e.g. \boxfigplaceholder.
+\newcommand{\bookfitimagewidth}[2]{%
+  \parbox{#2}{\centering\includegraphics[width=#2]{#1}}%
+}
+
+% Width-only variant of the tier/extension fallback loader -- same search
+% order (T1 -> T0, pdf -> png -> jpeg -> jpg) but sizes to WIDTH only.
+% #1 = T1 base  #2 = T0 base  #3 = placeholder label  #4 = target width
+\newcommand{\bookincludeimagewidth}[4]{%
+  \bookincludeimagewidthbase{#1}{#3}{#4}{#2}%
+}
+\newcommand{\bookincludeimagewidthbase}[4]{%
+  \IfFileExists{#1.pdf}{\bookfitimagewidth{#1.pdf}{#3}}{%
+  \IfFileExists{#1.png}{\bookfitimagewidth{#1.png}{#3}}{%
+  \IfFileExists{#1.jpeg}{\bookfitimagewidth{#1.jpeg}{#3}}{%
+  \IfFileExists{#1.jpg}{\bookfitimagewidth{#1.jpg}{#3}}{%
+    \IfStrEq{#4}{}{%
+      \bookimageplaceholder{#2}{#3}{\bookboxfigheight}{box image}% no more bases
+    }{%
+      \bookincludeimagewidthbase{#4}{#2}{#3}{}% try the other tier
+    }%
+  }}}}%
+}
+
+\newcommand{\boxfigplaceholder}[1]{%
+  \StrLeft{#1}{3}[\figtmpA]\StrRight{\figtmpA}{2}[\figtmpB]%
+  \xdef\bookfigchapnum{\figtmpB}%
+  \begin{center}
+  \bookincludeimagewidth
+    {./figures/chapter\bookfigchapnum/T1/#1_T1}%
+    {./figures/chapter\bookfigchapnum/T0/#1_T0}%
+    {#1}{\linewidth}%
+  \end{center}
+}
+
+\newcommand{\boxbiofigplaceholder}[1]{%
+  \StrLeft{#1}{3}[\figtmpA]\StrRight{\figtmpA}{2}[\figtmpB]%
+  \xdef\bookfigchapnum{\figtmpB}%
+  \centering
+  \bookincludeimagecrop
+    {./figures/chapter\bookfigchapnum/T1/#1_T1}%
+    {./figures/chapter\bookfigchapnum/T0/#1_T0}%
+    {#1}{\bookbiofigwidth}{\bookbiofigheight}%
+}
+
+% =========================================================================
+% 10. BOXES  (S/L sized via the call site -- see transform_manuscript.py,
+%     which wraps \begin{boxmain}...\end{boxmain} in figure/figure*[t/b])
+% =========================================================================
+
+% Inner box padding, split lateral vs vertical so they can be tuned
+% independently (previously left/right were hardcoded 1mm and top/bottom
+% were left to tcolorbox defaults -- this made vertical look inconsistent
+% with lateral, since it wasn't actually the same value).
+\newcommand{\bookboxpad}{1mm}        % global padding
+\newcommand{\bookboxpadlat}{0.5mm}        % left/right, inside the frame
+\newcommand{\bookboxpadtop}{0.5mm}        % body content: gap above first line
+\newcommand{\bookboxpadbottom}{0.5mm}     % body content: gap below last line
+\newcommand{\bookboxpadtoptitle}{0.5mm}   % title bar: gap above title text
+\newcommand{\bookboxpadbottomtitle}{0mm}% title bar: gap below title, to its rule
+
+\tcbset{
+  myboxstyle/.style={
+    enhanced,
+    % NOT breakable: every box in the book layout lives inside a float
+    % (figure/figure*), and floats cannot break across pages -- a breakable
+    % tcolorbox inside one renders corrupted, overlapping the body text.
+    % A box that will not fit on one page must be split editorially.
+    breakable = false,
+    colback      = boxcolorcurrent,
+    colbacktitle = boxcolorcurrent,
+    coltitle     = headingcolor,
+    colframe     = boxcolorcurrent,
+    boxrule      = 0pt,
+    arc          = 0pt,
+    boxsep       = \bookboxpad,
+    left         = \bookboxpadlat,
+    right       = \bookboxpadlat,
+    top          = \bookboxpadtop,
+    bottom      = \bookboxpadbottom,
+    toptitle     = \bookboxpadtoptitle,
+    bottomtitle = \bookboxpadbottomtitle,
+    fonttitle    = \bfseries\sffamily\small,
+    fontupper    = \sffamily\footnotesize\color{maintextcolor},
+    fontlower    = \sffamily\footnotesize\color{maintextcolor},
+  }
+}
+
+% The actual numbered tcolorbox -- SAME keys/theme/title signature as the
+% manuscript's boxmain, just renamed \boxmaininner. \boxmain (below) is
+% now the public name and owns the size/placement decision itself.
+\newtcolorbox[
+  auto counter,
+  number within = chapter,
+  list inside   = lob,
+]{boxmaininner}[3][]{
+  myboxstyle, width=\linewidth,
+  title = {Box~\thetcbcounter\;#2: #3},
+  #1,
+}
+\crefname{tcb@cnt@boxmaininner}{box}{boxes}
+\Crefname{tcb@cnt@boxmaininner}{Box}{Boxes}
+
+% Boolean recording which literal float (figure vs figure*) THIS \boxmain
+% call opened, so the matching \end{...} closes the same one. Kept as a
+% plain \if...\fi (not \IfStrEq) because \if...\fi does no grouping of
+% its own -- \begin{figure}'s internal group can stay open safely all the
+% way across to the matching \end{figure} in the end-code below. \IfStrEq
+% cannot safely wrap a literal \begin{...}/\end{...} directly (its own
+% internal grouping breaks the float's group balance). And unlike
+% \expandafter\begin\expandafter{...}, every \begin/\end name below is a
+% plain literal string, so the linter can resolve and match all of them.
+\newif\ifbookboxsizeS
+
+\NewDocumentEnvironment{boxmain}{O{L} O{t} O{} m m}{%
+  \IfStrEq{#1}{S}{\bookboxsizeStrue}{\bookboxsizeSfalse}%
+  \ifbookboxsizeS
+    \begin{figure}[#2]
+  \else
+    \begin{figure*}[#2]
+  \fi
+  \begin{boxmaininner}[#3]{#4}{#5}%
+}{%
+  \end{boxmaininner}
+  \ifbookboxsizeS
+    \end{figure}
+  \else
+    \end{figure*}
+  \fi
+}
+
+% Professional-skills box (unchanged) -- placed by \chapterfirstpage.
+\newtcolorbox{boxskills}{
+  myboxstyle,
+  title = {Professional practice relevance and skills developed},
+}
+
+% Biographies -- ALWAYS two-column width, bottom of page (invariant), so
+% the float wrapper is baked in here and chapter files call it exactly as
+% in the manuscript: \begin{boxbio}{Name}{birth}{death}...\end{boxbio}
+\newtcolorbox{boxbioinner}[3]{
+  myboxstyle, width=\linewidth,
+  breakable=false, sidebyside, sidebyside align=top,
+  lefthand width=\bookbiofigwidth,
+  sidebyside gap=\bookbiogap,
+  before lower={%
+    {\bfseries\sffamily\small\color{headingcolor}Biography: #1 (#2 -- #3)}\par
+    \vspace{\bookbiotitlegap}%
+  },
+}
+
+% Optional leading [t/b] controls page placement, default b per spec
+% ("biography always at the bottom of the page"). Existing manuscript
+% calls with no bracket (\begin{boxbio}{Name}{birth}{death}) keep working
+% unchanged, since the default already matches the old hardcoded [b].
+\newenvironment{boxbio}[4][b]
+  {\begin{figure*}[#1]\begin{boxbioinner}{#2}{#3}{#4}}
+  {\end{boxbioinner}\end{figure*}}
+
+% =========================================================================
+% 11. WORKED EXAMPLES  (inline, not floated -- unchanged from manuscript)
+% =========================================================================
+\newcounter{workedexample}
+\numberwithin{workedexample}{chapter}
+\renewcommand{\theworkedexample}{\thechapter.\arabic{workedexample}}
+
+\newenvironment{workedexample}[1]
+{%
+  \refstepcounter{workedexample}%
+  \setlength{\parindent}{0pt}%
+  \par\medskip\noindent
+  {\bfseries\small\fontfamily{phv}\selectfont\color{headingcolor}%
+   Worked Example~\theworkedexample: #1}\par
+}
+{%
+  \par\hfill End of Worked Example $\blacksquare$\par
+}
+\newcommand{\subcase}[1]{\par\noindent\textbf{#1.}\enspace\ignorespaces}
+\crefname{workedexample}{Worked Example}{Worked Examples}
+\Crefname{workedexample}{Worked Example}{Worked Examples}
+
+% -------------------------------------------------------------
+% Per-chapter numbering (unchanged from manuscript)
+\numberwithin{equation}{chapter}
+\numberwithin{figure}{chapter}
+\numberwithin{table}{chapter}
+
+
+% =========================================================================
+% 12. FLOAT PLACEMENT PARAMETERS
+% =========================================================================
+% This is a figure-dense book in which figures/boxes may only sit at the
+% top or bottom of a page, so LaTeX must be allowed to fill much more of a
+% page with floats than the (very conservative) defaults permit.
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\setcounter{dbltopnumber}{3}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\dbltopfraction}{0.9}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.7}
+\renewcommand{\dblfloatpagefraction}{0.7}
+

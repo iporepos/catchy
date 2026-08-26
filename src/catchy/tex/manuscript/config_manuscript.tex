@@ -1,0 +1,361 @@
+% -----------------------------------------------------------------------
+% Packages
+% -----------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage[english]{babel}
+\usepackage[useregional]{datetime2}
+\usepackage{cleveref}
+\usepackage{xstring}
+\usepackage{geometry}
+\usepackage{mdframed}
+\usepackage{tcolorbox}       % styled coloured boxes
+  \tcbuselibrary{skins, breakable}
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{setspace}
+\usepackage{microtype}
+\usepackage[shortlabels]{enumitem}
+% Fonts
+\usepackage{helvet}
+\usepackage{times}
+\usepackage{titlesec}   % sections titles
+\usepackage{eurosym}
+\usepackage{changepage}
+\usepackage{wasysym}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% Line numbering (for editorial review)
+% -------------------------------------------------------------
+\usepackage{lineno}
+\renewcommand{\linenumberfont}{\normalfont\tiny\sffamily\color{gray}}
+\AtBeginDocument{\linenumbers}
+
+
+% Colours
+\definecolor{headingcolor}{RGB}{42, 110, 184}
+\definecolor{boxcolor}{RGB}{244, 247, 252}
+
+% -----------------------------------------------------------------------
+% Part-dependent box colour
+% -----------------------------------------------------------------------
+% Part 1: Chapters 0-5   -> light blue
+% Part 2: Chapters 6-9   -> light green
+% Part 3: Chapters 10-15 -> light amber
+\definecolor{boxcolorpart1}{RGB}{244, 247, 252}
+\definecolor{boxcolorpart2}{RGB}{238, 252, 250}
+\definecolor{boxcolorpart3}{RGB}{252, 246, 238}
+
+\newcommand{\boxcolor}{%
+  \ifnum\value{chapter}<6
+    \colorlet{boxcolorcurrent}{boxcolorpart1}%
+  \else\ifnum\value{chapter}<10
+    \colorlet{boxcolorcurrent}{boxcolorpart2}%
+  \else
+    \colorlet{boxcolorcurrent}{boxcolorpart3}%
+  \fi\fi
+}
+
+
+\usepackage[font={footnotesize,sf}, labelfont={bf,color=headingcolor}]{caption}
+
+\newcommand{\degree}{\ensuremath{{}^{\circ}}}
+
+\hypersetup{
+  colorlinks  = true,        % coloured text instead of rectangles
+  linkcolor   = blue!60!black,  % internal links (ToC, \ref, \pageref)
+  citecolor   = blue!60!black,  % bibliography citations
+  urlcolor    = blue!60!black,  % external URLs
+}
+
+% Page layout
+\geometry{
+ a4paper,
+ left=40mm,
+ right=20mm,
+ top=20mm,
+ bottom=25mm
+}
+
+% Text body tab
+\newcommand{\bodytab}{10mm}
+
+% Paragraph indentation
+\setlength{\parindent}{0mm}
+
+% Paragraph spacing
+\setlength{\parskip}{2.5mm}
+
+% --------------------------------------------------------------
+% Line spacing
+\linespread{1.1}
+
+% --------------------------------------------------------------
+% Page style
+\pagestyle{fancy}
+
+% ----------- header -----------
+\fancyhead[L]{\sffamily\scriptsize{Sivapalan \textit{et al.} (in press)}}
+\fancyhead[R]{\sffamily\scriptsize{\chaptername~\thechapter\;--\;Manuscript}}
+\renewcommand{\headrulewidth}{0.2pt}
+
+% ----------- footer -----------
+\fancyfoot[L]{\sffamily\scriptsize{Compilation:~\DTMNow}}
+\fancyfoot[C]{\sffamily\scriptsize{}}
+\fancyfoot[R]{\sffamily\scriptsize{\thepage\;/\;\pageref{LastPage}}}
+\renewcommand{\footrulewidth}{0.2pt}
+
+% Set sans-serif font
+\renewcommand{\sfdefault}{phv} % phv=Helvetica
+
+% Chapter and section title formatting
+\titleformat{\chapter}[block]
+  {\bfseries\fontfamily{phv}\selectfont\Large\color{headingcolor}}
+  {\chaptername~\thechapter}{1em}{}
+\titleformat*{\section}{\bfseries\fontfamily{phv}\selectfont\large\color{headingcolor}}
+\titleformat*{\subsection}{\bfseries\fontfamily{phv}\selectfont\normalsize\color{headingcolor}}
+\titleformat*{\subsubsection}{\bfseries\fontfamily{phv}\selectfont\small\color{headingcolor}}
+\setcounter{secnumdepth}{3}
+\renewcommand{\thesubsubsection}{(\alph{subsubsection})}
+% -----------------------------------------------------------------------
+% Standard commands
+% -----------------------------------------------------------------------
+
+% Author/editorial note
+\newcommand{\authornote}[1]{\hl{[Author note: #1]}}
+
+% -----------------------------------------------------------------------
+% Opening image placeholder (Tier 1 — no float, no numbering)
+% #1 = caption text
+\newcommand{\openingimage}[2]{%
+    \StrLeft{#1}{3}[\figtmpA]%
+\StrRight{\figtmpA}{2}[\figchapnum]%
+\def\figbase{./figures/chapter\figchapnum/T0/#1_T0}%
+\begin{adjustwidth}{0cm}{0cm}
+    \centering
+    \IfFileExists{\figbase.jpeg}{%
+      \parbox[c][4cm][c]{4cm}{\centering\sffamily\footnotesize Figure \\ #1}%
+      \hspace{0.5cm}%
+      \parbox[c][6cm][c]{9cm}{\centering\includegraphics[height=6cm, width=9cm,keepaspectratio]{\figbase.jpeg}}%
+    }{%
+      \IfFileExists{\figbase.png}{%
+        \parbox[c][4cm][c]{4cm}{\centering\sffamily\footnotesize Figure \\ #1}%
+        \hspace{0.5cm}%
+        \parbox[c][6cm][c]{12cm}{\centering\includegraphics[height=6cm, width=12cm,keepaspectratio]{\figbase.png}}%
+      }{%
+        \fbox{%
+          \parbox{0.7\linewidth}{%
+            \centering
+            \vspace{2cm}
+            \sffamily \footnotesize Figure #1
+            \vspace{2cm}
+          }%
+        }%
+      }%
+    }
+  \end{adjustwidth}
+  {\sffamily \footnotesize #2}
+\vspace{5mm}
+}
+
+\newcommand{\inthischapter}[1]{
+\noindent \textit{In this chapter} \ldots
+
+\noindent #1
+
+}
+% -----------------------------------------------------------------------
+% BOXES
+% Shared style preset — edit once, applies to both boxes below
+\tcbset{
+  myboxstyle/.style={
+    enhanced,              % full TikZ engine; needed for most options
+    breakable,             % allow splitting across pages
+    colback      = boxcolorcurrent,
+    colbacktitle = boxcolorcurrent,
+    coltitle     = headingcolor,           % white title text
+    colframe     = headingcolor,   % frame line same as title bar
+    boxrule      = 1pt,           % thin frame line; use 0pt + "frame hidden" for none
+    arc          = 0pt,             % slightly rounded corners; arc=0pt for sharp
+    left         = 1mm,  % left inner padding
+    right        = 1mm,  % right inner padding
+    fonttitle    = \bfseries\sffamily\small,
+    fontupper    = \sffamily\footnotesize,
+    fontlower    = \sffamily\footnotesize,
+  }
+}
+
+% Numbered variant — counter increments automatically.
+% Takes an optional first argument for per-instance tcolorbox keys,
+% most usefully: \begin{keybox}[list text=Short entry]{Full title}
+% The optional arg is passed directly to tcolorbox so any valid key works.
+\newtcolorbox[
+  auto counter,          % create and manage a counter for this box type
+  number within = chapter,  % reset counter at each new chapter
+  list inside   = lob,   % register entries for a \listof if desired
+]{boxmain}[3][]{          % #1 = optional keys, #2 = theme #3 = title
+  myboxstyle,
+  title = {Box~\thetcbcounter\;#2: #3},
+  #1,                    % per-instance keys applied last (override style)
+}
+
+
+% Professional Skills
+\newtcolorbox{boxskills}{
+  myboxstyle,
+  title = {Professional practice relevance and skills developed},
+}
+
+% Biographies (portrait on the left, text on the right)
+\newtcolorbox{boxbio}[3]{
+  myboxstyle,
+  breakable=false,
+  sidebyside,
+  sidebyside align=top,
+  lefthand width=0.2\linewidth,
+  title = {Biography: #1 (#2 -- #3)},
+}
+
+% Portrait placeholder for boxbio (Tier 1 -- resolved at Tier 2)
+% #1 = caption text shown in the placeholder frame (typically the person's name)
+\newcommand{\boxbiofigplaceholder}[1]{%
+  \StrLeft{#1}{3}[\figtmpA]%
+  \StrRight{\figtmpA}{2}[\figchapnum]%
+  \def\figbase{./figures/chapter\figchapnum/T0/#1_T0}%
+  \centering
+  \IfFileExists{\figbase.jpeg}{%
+    \parbox[c][4cm][c]{3cm}{\centering\includegraphics[height=4cm, width=3cm,keepaspectratio]{\figbase.jpeg}}%
+    \newline
+    \parbox[c][1cm][c]{3cm}{\centering\sffamily\footnotesize Figure \\ #1}%
+    }{%
+      \IfFileExists{\figbase.png}{%
+        \parbox[c][4cm][c]{3cm}{\centering\includegraphics[height=4cm, width=3cm,keepaspectratio]{\figbase.png}}%
+        \newline
+        \parbox[c][1cm][c]{3cm}{\centering\sffamily\footnotesize Figure \\ #1}%
+      }{%
+        \fbox{\parbox[c][4cm][c]{3cm}{\centering \sffamily \footnotesize Figure \\ #1}}%
+      }%
+    }%
+}%
+
+% Take-home messages
+\newtcolorbox{boxmessages}{
+  myboxstyle,
+  title = {Take home messages of Chapter \thechapter},
+}
+
+% Make \cref / \Cref recognise the boxmain counter
+\crefname{tcb@cnt@boxmain}{box}{boxes}
+\Crefname{tcb@cnt@boxmain}{Box}{Boxes}
+
+
+% --------------------------------------------------------------------
+% Figure placeholder
+% #1 = positional key  e.g. C07-mtx-compartments
+% #2 = display label   e.g. C07-mtx-compartments
+% #3 = caption text
+\newcommand{\figplaceholder}[3]{%
+  \StrLeft{#1}{3}[\figtmpA]%
+  \StrRight{\figtmpA}{2}[\figchapnum]%
+  \def\figbase{./figures/chapter\figchapnum/T0/#1_T0}%
+  \begin{figure}[htbp]
+  \begin{adjustwidth}{0cm}{0cm}
+    \centering
+    \IfFileExists{\figbase.jpeg}{%
+      \parbox[c][4cm][c]{4cm}{\centering\sffamily\footnotesize Figure \\ #2}%
+      \hspace{0.5cm}%
+      \fbox{\parbox[c][4cm][c]{10cm}{\centering\includegraphics[height=4cm, width=10cm,keepaspectratio]{\figbase.jpeg}}}%
+    }{%
+      \IfFileExists{\figbase.png}{%
+        \parbox[c][4cm][c]{4cm}{\centering\sffamily\footnotesize Figure \\ #2}%
+        \hspace{0.5cm}%
+        \fbox{\parbox[c][4cm][c]{10cm}{\centering\includegraphics[height=4cm, width=10cm,keepaspectratio]{\figbase.png}}}%
+      }{%
+        \fbox{%
+          \parbox{0.7\linewidth}{%
+            \centering
+            \vspace{2cm}
+            \sffamily \footnotesize Figure #2
+            \vspace{2cm}
+          }%
+        }%
+      }%
+    }
+    \caption{#3}
+    \label{#1}
+  \end{adjustwidth}
+  \end{figure}%
+}
+
+\newcommand{\boxfigplaceholder}[1]{%
+\StrLeft{#1}{3}[\figtmpA]%
+\StrRight{\figtmpA}{2}[\figchapnum]%
+\def\figbase{./figures/chapter\figchapnum/T0/#1_T0}%
+\begin{adjustwidth}{0cm}{0cm}
+    \centering
+    \IfFileExists{\figbase.jpeg}{%
+      \parbox[c][4cm][c]{4cm}{\centering\sffamily\footnotesize Figure \\ #1}%
+      \hspace{0.5cm}%
+      \fbox{\parbox[c][4cm][c]{8cm}{\centering\includegraphics[height=4cm, width=8cm,keepaspectratio]{\figbase.jpeg}}}%
+    }{%
+      \IfFileExists{\figbase.png}{%
+        \parbox[c][4cm][c]{4cm}{\centering\sffamily\footnotesize Figure \\ #1}%
+        \hspace{0.5cm}%
+        \fbox{\parbox[c][4cm][c]{8cm}{\centering\includegraphics[height=4cm, width=8cm,keepaspectratio]{\figbase.png}}}%
+      }{%
+        \fbox{%
+          \parbox{0.7\linewidth}{%
+            \centering
+            \vspace{2cm}
+            \sffamily \footnotesize Figure #1
+            \vspace{2cm}
+          }%
+        }%
+      }%
+    }
+  \end{adjustwidth}
+}
+
+% -----------------------------------------------------------------------
+% Environments
+% -----------------------------------------------------------------------
+
+
+% Worked examples (theorem-like, numbered automatically per chapter)
+% -----------------------------------------------------------------------
+\newcounter{workedexample}
+\numberwithin{workedexample}{chapter}
+\renewcommand{\theworkedexample}{\thechapter.\arabic{workedexample}}
+
+\newenvironment{workedexample}[1]
+{%
+  \refstepcounter{workedexample}%
+  \setlength{\parindent}{0pt}%
+  \par\medskip\noindent
+  {\bfseries\small\fontfamily{phv}\selectfont\color{headingcolor}%
+   Worked Example~\theworkedexample: #1}\par
+}
+{%
+  \par\hfill End of Worked Example $\blacksquare$\par
+}
+
+% Problem / Solution substructure within a worked example
+\newcommand{\subcase}[1]{\par\noindent\textbf{#1.}\enspace\ignorespaces}
+% Make \cref / \Cref recognise the workedexample counter
+\crefname{workedexample}{Worked Example}{Worked Examples}
+\Crefname{workedexample}{Worked Example}{Worked Examples}
+
+
+% -------------------------------------------------------------
+% prefix numbering
+\numberwithin{equation}{chapter}
+\numberwithin{figure}{chapter}
+\numberwithin{table}{chapter}
+

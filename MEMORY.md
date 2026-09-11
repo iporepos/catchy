@@ -36,3 +36,19 @@
 - Classified all scripts for idempotency: `setup_svg` is intentionally one-pass (overwrites SVGs for stand-by notes unconditionally, write-gate does not apply). `publish_src` and `publish_main` have no safe mode. All others are safe to re-run.
 - Upgraded `README.md` with: overview, pipeline execution order, general warnings, CLI conventions, and a per-module micro reference (intent, run command, re-run safety, caveats).
 - Notable bug flagged: `reformat_svg_sizes.py` class is named `ScriptReformatFonts` (copy-paste artifact, should be `ScriptReformatSizes`).
+
+## 2026-09-11 (graceful error handling in build_figures)
+
+- Added per-figure `try/except Exception` in `ScriptBuildFigures.processing()` (`src/catchy/build_figures.py`).
+  - The batch loop no longer aborts on a bad SVG — failures are caught, the loop continues.
+  - Two warning summaries printed at the end of each run:
+    1. Figures skipped via `SKIP_FIGS` hard-coded list.
+    2. Figures that failed to build, each with its error message.
+  - `send_to_drive()` still runs after the loop, distributing whatever was successfully built.
+
+## 2026-09-11 (move SKIP_FIGS to config.local.json)
+
+- Removed hardcoded `SKIP_FIGS` class variable from `ScriptBuildFigures` in `src/catchy/build_figures.py`.
+- Added `"skip_figs"` key to `config.local.json` (project root) with the same list.
+- Skip check in `processing()` now reads `config.get("skip_figs", [])` — `config` is already in scope via `from catchy.core import *`.
+- The `.get(..., [])` fallback makes the key optional in the JSON.

@@ -11,6 +11,7 @@ catalog*
 scripts/
 .claude
 CLAUDE.md
+prompt.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

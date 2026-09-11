@@ -197,7 +197,7 @@ Latin: \texttt{{{FONT}}} \quad Greek: \texttt{{{GREEK_FONT}}} \quad Operators: \
 
 def main():
     tex = build_tex()
-    out = Path("./outputs/catalog.tex")
+    out = Path("../outputs/catalog.tex")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(tex, encoding="utf-8")
     print(f"Wrote {out} -- compile with:  xelatex {out.name}")

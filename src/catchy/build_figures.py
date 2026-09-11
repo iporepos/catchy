@@ -62,13 +62,6 @@ class ScriptBuildFigures(Script):
     TITLE = "BUILD IMAGES FROM SVG FILES"
     LOG_NAME = LOG_PREFIX.format("build-images")
 
-    # Applies only to batch runs (--collection). An explicit --figure
-    # request always overrides this list, since naming a figure directly
-    # is a stronger signal of intent than the blanket skip.
-    SKIP_FIGS = [
-        "C14-mtx-walker",
-    ]
-
     DC_COLLECTIONS = {
         "cover": "cov",
         "main text": "mtx",
@@ -211,61 +204,69 @@ class ScriptBuildFigures(Script):
         # --------------------------------------------------
         # heading_subsection(msg="Render SVG")
         ls_skipped = []
+        ls_failed = []
         self.print_info(f"rendering SVGs ...")
         for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="file"):
 
             f = Path(row["note_file"])
             fig_name = f.stem
 
-            if fig_name in self.SKIP_FIGS and not self.figure:
+            if fig_name in config.get("skip_figs", []) and not self.figure:
                 ls_skipped.append(fig_name)
                 continue
 
-            fsvg = f.parent / f"{fig_name}.svg"
+            try:
+                fsvg = f.parent / f"{fig_name}.svg"
 
-            if not fsvg.is_file():
-                continue
+                if not fsvg.is_file():
+                    continue
 
-            svg = FigureSVG()
-            svg.load_data(fsvg)
+                svg = FigureSVG()
+                svg.load_data(fsvg)
 
-            if self.write:
+                if self.write:
 
-                # PDF building
-                self.build_pdf(f.stem, svg, row, opacity=0)
+                    # PDF building
+                    self.build_pdf(f.stem, svg, row, opacity=0)
 
-                # JPEG building
-                self.build_image(
-                    f.stem,
-                    svg,
-                    row,
-                    build_jpeg=True,
-                    delete_png=True,
-                    opacity=1,
-                )
-
-                if row["collection"] == "box":
-
-                    # JPEG + PNG building
+                    # JPEG building
                     self.build_image(
                         f.stem,
                         svg,
                         row,
-                        build_jpeg=False,
-                        delete_png=False,
-                        opacity=0,
+                        build_jpeg=True,
+                        delete_png=True,
+                        opacity=1,
                     )
 
+                    if row["collection"] == "box":
 
+                        # JPEG + PNG building
+                        self.build_image(
+                            f.stem,
+                            svg,
+                            row,
+                            build_jpeg=False,
+                            delete_png=False,
+                            opacity=0,
+                        )
 
-            else:
-                time.sleep(0.01)
+                else:
+                    time.sleep(0.01)
+
+            except Exception as e:
+                ls_failed.append((fig_name, str(e)))
 
         self.send_to_drive()
 
-        if len(ls_skipped) > 0:
-            self.print_warn(msg="Some files were skipped:")
+        if ls_skipped:
+            self.print_warn(msg="Some figures were skipped (hard-coded list):")
             pprint.pp(ls_skipped)
+
+        if ls_failed:
+            self.print_warn(msg="Some figures failed to build:")
+            for name, err in ls_failed:
+                self.print_warn(f"  {name}: {err}")
 
         self.print_step("Done")
         return None

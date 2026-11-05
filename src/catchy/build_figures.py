@@ -10,6 +10,11 @@ filters figures based on their completion status, and orchestrates the batch
 conversion of SVGs using the Los Alamos custom tools. Rendered images are
 subsequently distributed to their designated chapter directories within the
 configured drive or file system.
+
+Passing ``--recent [HOURS]`` narrows a chapter build to the figures that are
+not in 'stand-by' status and whose SVG was modified within the last ``HOURS``
+hours (24 by default). Only the figures built in the current run are sent to
+their chapter directories.
 """
 
 import time
@@ -46,17 +51,25 @@ class ScriptBuildFigures(Script):
     required in that mode (an explicit ``--chapter`` is still respected if
     given alongside ``--figure``).
 
+    Recently edited figures may be targeted via ``--recent [HOURS]``, which
+    selects the figures not in 'stand-by' status whose SVG was modified within
+    the given window. It is ignored when ``--figure`` is set.
+
     :cvar TITLE: The display title of the script.
     :type TITLE: str
     :cvar LOG_NAME: Standard prefix for logging, specific to the build-images process.
     :type LOG_NAME: str
     :cvar DC_COLLECTIONS: Mapping of collection names to their file prefix representations.
     :type DC_COLLECTIONS: dict
+    :cvar RECENT_HOURS: Default time window, in hours, used by ``--recent``.
+    :type RECENT_HOURS: int
 
     :ivar collection: The specific figure collection targeted for processing (defaults to "all").
     :vartype collection: str
     :ivar figure: The label of a single figure to build (e.g. "C01-mtx-hydro"), or None.
     :vartype figure: str or None
+    :ivar recent: The ``--recent`` time window in hours, or None when not requested.
+    :vartype recent: float or None
     """
 
     TITLE = "BUILD IMAGES FROM SVG FILES"
@@ -70,10 +83,13 @@ class ScriptBuildFigures(Script):
         "all": "*",
     }
 
+    RECENT_HOURS = 24
+
     def __init__(self):
         super().__init__()
         self.collection = None
         self.figure = None
+        self.recent = None
 
     def get_parser(self):
         parser = super().get_parser()
@@ -88,6 +104,19 @@ class ScriptBuildFigures(Script):
                 "token, so --collection is ignored when this is set."
             ),
         )
+        parser.add_argument(
+            "--recent",
+            nargs="?",
+            type=float,
+            const=self.RECENT_HOURS,
+            default=None,
+            metavar="HOURS",
+            help=(
+                "Build only figures not in 'stand-by' status whose SVG was "
+                f"modified in the last HOURS hours (default: {self.RECENT_HOURS}). "
+                "Ignored when --figure is set."
+            ),
+        )
 
         return parser
 
@@ -95,6 +124,7 @@ class ScriptBuildFigures(Script):
         super().set_arguments(args)
         self.collection = args.collection
         self.figure = args.figure
+        self.recent = args.recent
 
         # Script.run() reads args.chapter right after this method returns,
         # via the same Namespace object, and crashes if it's None. A
@@ -121,6 +151,23 @@ class ScriptBuildFigures(Script):
         token = label.split("-")[0]
         return int(token.lstrip("Cc"))
 
+    def is_recent_svg(self, note_file):
+        """
+        Checks if a note's paired SVG was modified within ``self.recent`` hours.
+
+        :param note_file: Path to the figure's markdown note.
+        :type note_file: str or pathlib.Path
+        :returns: True if the SVG exists and is within the window, False otherwise.
+        :rtype: bool
+        """
+        f = Path(note_file)
+        fsvg = f.parent / f"{f.stem}.svg"
+
+        if not fsvg.is_file():
+            return False
+
+        return time.time() - fsvg.stat().st_mtime <= self.recent * 3600
+
     def processing(self):
         """
         Executes the main figure rendering workflow.
@@ -133,7 +180,9 @@ class ScriptBuildFigures(Script):
         notes for the current chapter and chosen collection, loads them into
         a metadata catalog, filters by status, and iterates over the
         filtered list to export the associated SVG files into raster
-        images. Finally, it triggers the distribution of these files to the
+        images. When ``self.recent`` is set, the status filter is replaced
+        by 'not stand-by' plus an SVG modification time check. Finally, it
+        triggers the distribution of the files built in this run to the
         target drive.
 
         :returns: None
@@ -186,6 +235,10 @@ class ScriptBuildFigures(Script):
             # a single figure was explicitly requested — build it regardless
             # of its concluded/pending status
             df = df_full.copy()
+        elif self.recent is not None:
+            df = df_full.query("status != 'stand-by'").copy()
+            is_recent = df["note_file"].apply(self.is_recent_svg).astype(bool)
+            df = df[is_recent].reset_index(drop=True)
         else:
             df = df_full.copy()
             df_sub_1 = df.query("status == 'concluded'").copy()
@@ -194,6 +247,12 @@ class ScriptBuildFigures(Script):
             df = pd.concat([df_sub_1, df_sub_2]).reset_index(drop=True)
 
         self.print_info(f"{len(df)} notes filtered.")
+
+        if self.recent is not None and not self.figure and len(df) == 0:
+            self.print_warn(
+                f"WARNING >>> 0 figures modified in the last {self.recent:g} hours"
+            )
+            return None
 
         print("\n")
         print(df[["note_name", "title"]])
@@ -205,6 +264,7 @@ class ScriptBuildFigures(Script):
         # heading_subsection(msg="Render SVG")
         ls_skipped = []
         ls_failed = []
+        ls_built = []
         self.print_info(f"rendering SVGs ...")
         for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="file"):
 
@@ -254,10 +314,12 @@ class ScriptBuildFigures(Script):
                 else:
                     time.sleep(0.01)
 
+                ls_built.append(fig_name)
+
             except Exception as e:
                 ls_failed.append((fig_name, str(e)))
 
-        self.send_to_drive()
+        self.send_to_drive(ls_names=ls_built)
 
         if ls_skipped:
             self.print_warn(msg="Some figures were skipped (hard-coded list):")
@@ -369,7 +431,7 @@ class ScriptBuildFigures(Script):
 
         return None
 
-    def send_to_drive(self):
+    def send_to_drive(self, ls_names=None):
         """
         Distributes generated images to their final chapter directories.
 
@@ -378,6 +440,8 @@ class ScriptBuildFigures(Script):
         folders based on the prefixes of the filenames. Respects safe execution
         mode by simulating the copy process if ``self.write`` is False.
 
+        :param ls_names: Figure names to send (e.g. ``["C01-mtx-hydro"]``). If None, sends every T1 file found.
+        :type ls_names: list of str or None
         :returns: None
         """
         folder = STD_OUTPUT
@@ -385,6 +449,10 @@ class ScriptBuildFigures(Script):
         ls_figs_png = glob.glob(f"{folder}/C*_T1.png")
         ls_figs_pdf = glob.glob(f"{folder}/C*_T1.pdf")
         ls_figs = ls_figs_jpeg + ls_figs_png + ls_figs_pdf
+
+        if ls_names is not None:
+            ls_stems = [f"{name}_T1" for name in ls_names]
+            ls_figs = [f for f in ls_figs if Path(f).stem in ls_stems]
 
         self.print_info("sending from outputs to drive")
 

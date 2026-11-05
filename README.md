@@ -188,16 +188,20 @@ python reformat_svg_flags.py --chapter all -w  # all chapters
 
 Renders active SVG files (status `concluded` or containing `pending`) to raster output.
 Produces JPEG and PDF for standard figures; PNG and PDF for `box` collection figures
-(transparent background). Distributes all generated files to `FIGURES_DIR/chapter<NN>/T1/`.
+(transparent background). Distributes the files built in the current run to `FIGURES_DIR/chapter<NN>/T1/`.
+
+`--recent [HOURS]` builds only figures not in `stand-by` whose SVG was modified in the last `HOURS` hours (default 24).
 
 ```bash
-python build_figures.py --chapter <N> [--collection <cover|main text|biography|box|all>] [-w]
+python build_figures.py --chapter <N> [--collection <cover|main text|biography|box|all>] [--recent [HOURS]] [-w]
 
 # examples
 python build_figures.py --chapter 3                              # dry run, all collections
 python build_figures.py --chapter 3 -w                          # write mode, all collections
 python build_figures.py --chapter 3 --collection "main text" -w # main text figures only
 python build_figures.py --chapter 3 --collection box -w         # box figures (PNG output)
+python build_figures.py --chapter 3 --recent -w                 # SVGs modified in the last 24 hours
+python build_figures.py --chapter 3 --recent 48 -w              # SVGs modified in the last 48 hours
 ```
 
 > [!WARNING]

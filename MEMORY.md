@@ -52,3 +52,12 @@
 - Added `"skip_figs"` key to `config.local.json` (project root) with the same list.
 - Skip check in `processing()` now reads `config.get("skip_figs", [])` — `config` is already in scope via `from catchy.core import *`.
 - The `.get(..., [])` fallback makes the key optional in the JSON.
+
+## 2026-11-04 07:38 (--recent flag and built-only distribution in build_figures)
+
+- Added `--recent [HOURS]` to `ScriptBuildFigures` in `src/catchy/build_figures.py` (default `RECENT_HOURS = 24`, accepts decimals).
+  - Selects figures with `status != 'stand-by'` whose paired SVG modification time is inside the window. This replaces the default `concluded`/`pending` filter for that run.
+  - Ignored when `--figure` is set. Figures in `skip_figs` are still skipped.
+  - When nothing matches, warns and stops before rendering or distribution.
+- `send_to_drive()` now takes optional `ls_names`; `None` keeps the old send-everything behavior.
+- `processing()` passes the figures built in the current run, on all runs. Older files in `STD_OUTPUT` and output from figures that failed partway are no longer copied.

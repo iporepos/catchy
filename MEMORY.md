@@ -61,3 +61,30 @@
   - When nothing matches, warns and stops before rendering or distribution.
 - `send_to_drive()` now takes optional `ls_names`; `None` keeps the old send-everything behavior.
 - `processing()` passes the figures built in the current run, on all runs. Older files in `STD_OUTPUT` and output from figures that failed partway are no longer copied.
+
+## 2026-11-11 15:09 (lint_purge_authornotes script)
+
+- Added `src/catchy/tex/manuscript/lint_purge_authornotes.py`: removes every `\authornote{...}` call (macro from `config_manuscript.tex`) from a `.tex` file.
+  - CLI: positional file path, optional `-o/--output`. In-place runs back up to `backup/` next to the file; `-o` runs take no backup.
+  - Brace-counting parser: nested groups and multi-line notes removed whole; `\authornote` definition, `\authornotes`, notes inside `%` comments, and escaped braces are left alone.
+  - Whitespace: whole-line notes drop the line (and one of two resulting consecutive blanks); inline notes drop following spaces, or preceding spaces when followed by punctuation/EOL.
+  - Line endings (LF/CRLF) preserved via `newline=''`. Unbalanced braces raise `ValueError` before anything is written.
+  - `backup_file()` uses `bkp_folder / (stem + ts + suffix)`. The version in `lint_purge_decorations.py` (`bkp_folder / src.with_name(...)`) puts the backup next to the file instead of in `backup/` when given an absolute path; that file was not changed.
+
+## 2026-11-17 06:05 (fixed-width tqdm progress bars)
+
+- Added `PBAR_FORMAT = "{l_bar}{bar:50}{r_bar}"` to `src/catchy/core.py` (constants block, after `LOG_PREFIX`).
+  - Keeps tqdm's default left/right text, but the bar itself is always 50 characters, regardless of terminal width.
+- Passed `bar_format=PBAR_FORMAT` to every active `tqdm(...)` call (19 calls): `build_figures.py`, `build_catalog.py`, `reformat_svg_flags.py`, `reformat_svg_fonts.py`, `reformat_svg_sizes.py`, `setup_svg.py`, `standardize_svg.py`, `update_notes.py`.
+  - The constant reaches each module via the existing `from catchy.core import *`.
+  - The commented-out tqdm loop in `reformat_svg_flags.py` was left as is.
+
+## 2026-11-17 08:01 (batch-aware write gate in build_figures)
+
+- `ScriptBuildFigures` (`src/catchy/build_figures.py`) now defers the write confirmation until the batch size is known.
+  - New class constant `LARGE_BATCH = 3` and instance flag `write_confirmed`.
+  - `handle_mode()` override: with `-w`, prints the WRITING MODE banner and sets `self.write = True` without prompting; safe mode delegates to `Script.handle_mode()` unchanged.
+  - `processing()`: after filtering and printing the list, if `self.write` and `len(df) >= LARGE_BATCH` and not yet confirmed → `gate_keeper()`. Yes sets `write_confirmed` (no re-ask in later chapters); No sets `self.write = False` (safe mode for the rest of the run, as before).
+  - Batch size is per chapter (`--chapter all` processes chapters one at a time).
+- `core.py` untouched; other scripts keep the upfront prompt.
+- README `build_figures` section: added a note on the batch-aware gate.

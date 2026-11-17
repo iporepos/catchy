@@ -121,6 +121,7 @@ PREFIX_PUB_SRC = str(config["prefix_publish_src"])
 
 NOTE_PATTERN = "C*-*-*.md"
 LOG_PREFIX = "cathy @ {}:"
+PBAR_FORMAT = "{l_bar}{bar:50}{r_bar}"  # tqdm layout with a fixed 50-char bar
 
 FIGS_PREFIXES = {
     "cover": "Figure",

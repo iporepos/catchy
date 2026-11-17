@@ -281,7 +281,7 @@ class ScriptBuildCatalog(Script):
         # --------------------------------------------------
 
         self.print_info(f"{chn} -- loading data ...")
-        with tqdm(ls_notes, desc=" >>> ", unit="file") as pbar:
+        with tqdm(ls_notes, desc=" >>> ", unit="file", bar_format=PBAR_FORMAT) as pbar:
             nc.load_list(pbar)
 
         s = get_message(f"{chn} -- {len(ls_notes)} notes loaded")
@@ -435,6 +435,7 @@ class ScriptBuildCatalog(Script):
             total=len(df),
             desc=" >>> ",
             unit="file",
+            bar_format=PBAR_FORMAT,
         ):
             ls_category.append(self.get_category(row))
             ls_files.append(self.get_file_texttt(row))
@@ -500,6 +501,7 @@ class ScriptBuildCatalog(Script):
             total=len(df),
             desc=" >>> ",
             unit="file",
+            bar_format=PBAR_FORMAT,
         ):
             content_print = template[:]
 
@@ -546,6 +548,7 @@ class ScriptBuildCatalog(Script):
             total=len(df),
             desc=" >>> ",
             unit="file",
+            bar_format=PBAR_FORMAT,
         ):
             nm = str(row.get("name", "unknown")).replace('"', "")
 
@@ -630,7 +633,7 @@ class ScriptBuildCatalog(Script):
         if len(ls_figs) == 0:
             return ls
         else:
-            for f_src in tqdm(ls_figs, desc=" sending ", unit="file"):
+            for f_src in tqdm(ls_figs, desc=" sending ", unit="file", bar_format=PBAR_FORMAT):
                 fp = Path(f_src)
                 nm = fp.name
                 chn = "chapter" + nm.split("-")[0].replace("C", "")
@@ -658,7 +661,7 @@ class ScriptBuildCatalog(Script):
             ls_src_files = list(src_dir_tier.glob("C*-*-*.jpeg"))
 
             self.print_info(f"copying files to {d} ...")
-            for f in tqdm(ls_src_files, desc=" copying ", unit="file"):
+            for f in tqdm(ls_src_files, desc=" copying ", unit="file", bar_format=PBAR_FORMAT):
                 f_dst = dst_dir_tier / f.name
                 shutil.copy(src=f, dst=f_dst)
 

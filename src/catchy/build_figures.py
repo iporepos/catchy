@@ -15,6 +15,11 @@ Passing ``--recent [HOURS]`` narrows a chapter build to the figures that are
 not in 'stand-by' status and whose SVG was modified within the last ``HOURS``
 hours (24 by default). Only the figures built in the current run are sent to
 their chapter directories.
+
+In write mode (``-w``), the overwrite confirmation is deferred until the batch
+size is known: batches smaller than ``LARGE_BATCH`` (3) figures are written
+without asking, larger ones ask once per run. With ``--chapter all`` the
+batch size is counted per chapter.
 """
 
 import time
@@ -55,6 +60,9 @@ class ScriptBuildFigures(Script):
     selects the figures not in 'stand-by' status whose SVG was modified within
     the given window. It is ignored when ``--figure`` is set.
 
+    In write mode, the confirmation prompt is skipped for batches smaller
+    than ``LARGE_BATCH`` (see :meth:`handle_mode` and :meth:`processing`).
+
     :cvar TITLE: The display title of the script.
     :type TITLE: str
     :cvar LOG_NAME: Standard prefix for logging, specific to the build-images process.
@@ -63,6 +71,8 @@ class ScriptBuildFigures(Script):
     :type DC_COLLECTIONS: dict
     :cvar RECENT_HOURS: Default time window, in hours, used by ``--recent``.
     :type RECENT_HOURS: int
+    :cvar LARGE_BATCH: Minimum batch size that requires write confirmation.
+    :type LARGE_BATCH: int
 
     :ivar collection: The specific figure collection targeted for processing (defaults to "all").
     :vartype collection: str
@@ -70,6 +80,8 @@ class ScriptBuildFigures(Script):
     :vartype figure: str or None
     :ivar recent: The ``--recent`` time window in hours, or None when not requested.
     :vartype recent: float or None
+    :ivar write_confirmed: True once write mode has been confirmed in this run.
+    :vartype write_confirmed: bool
     """
 
     TITLE = "BUILD IMAGES FROM SVG FILES"
@@ -84,12 +96,14 @@ class ScriptBuildFigures(Script):
     }
 
     RECENT_HOURS = 24
+    LARGE_BATCH = 3
 
     def __init__(self):
         super().__init__()
         self.collection = None
         self.figure = None
         self.recent = None
+        self.write_confirmed = False
 
     def get_parser(self):
         parser = super().get_parser()
@@ -133,6 +147,31 @@ class ScriptBuildFigures(Script):
         # --chapter explicitly.
         if self.figure and not args.chapter:
             args.chapter = self.get_chapter_from_label(self.figure)
+
+    def handle_mode(self, mode):
+        """
+        Defers the write confirmation until the batch size is known.
+
+        In write mode, prints the mode banner without asking; the prompt is
+        issued later in :meth:`processing`. Safe mode is delegated to
+        :meth:`Script.handle_mode` unchanged.
+
+        :param mode: True if ``-w`` was passed.
+        :type mode: bool
+        :returns: 0 in write mode, otherwise the parent's return value.
+        :rtype: int
+        """
+        if not mode:
+            return super().handle_mode(mode)
+
+        print("\n\n")
+        print(80 * "=")
+        print("WRITING MODE")
+        self.print_info(
+            f"confirmation deferred (asked only for batches of {self.LARGE_BATCH}+ figures)"
+        )
+        self.write = True
+        return 0
 
     @staticmethod
     def get_chapter_from_label(label):
@@ -181,9 +220,11 @@ class ScriptBuildFigures(Script):
         a metadata catalog, filters by status, and iterates over the
         filtered list to export the associated SVG files into raster
         images. When ``self.recent`` is set, the status filter is replaced
-        by 'not stand-by' plus an SVG modification time check. Finally, it
-        triggers the distribution of the files built in this run to the
-        target drive.
+        by 'not stand-by' plus an SVG modification time check. In write
+        mode, batches of ``LARGE_BATCH`` or more figures ask for confirmation
+        once per run before rendering; declining switches to safe mode.
+        Finally, it triggers the distribution of the files built in this run
+        to the target drive.
 
         :returns: None
         """
@@ -217,7 +258,7 @@ class ScriptBuildFigures(Script):
         # --------------------------------------------------
         # heading_subsection(msg="Load data")
         self.print_info("loading data ...")
-        with tqdm(ls_notes, desc=" >>> ", unit="file") as pbar:
+        with tqdm(ls_notes, desc=" >>> ", unit="file", bar_format=PBAR_FORMAT) as pbar:
             nc.load_list(pbar)
 
         s = get_message(f"{len(ls_notes)} notes loaded to collection.")
@@ -259,6 +300,17 @@ class ScriptBuildFigures(Script):
         print("\n")
 
         # --------------------------------------------------
+        # Write gate (large batches only)
+        # --------------------------------------------------
+        if self.write and not self.write_confirmed and len(df) >= self.LARGE_BATCH:
+            if self.gate_keeper("This script will overwrite data\n"):
+                self.print_step("Writing confirmed (write mode)")
+                self.write_confirmed = True
+            else:
+                self.print_warn("Writing cancelled (entering safe mode)")
+                self.write = False
+
+        # --------------------------------------------------
         # Process
         # --------------------------------------------------
         # heading_subsection(msg="Render SVG")
@@ -266,7 +318,7 @@ class ScriptBuildFigures(Script):
         ls_failed = []
         ls_built = []
         self.print_info(f"rendering SVGs ...")
-        for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="file"):
+        for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="file", bar_format=PBAR_FORMAT):
 
             f = Path(row["note_file"])
             fig_name = f.stem
@@ -456,7 +508,7 @@ class ScriptBuildFigures(Script):
 
         self.print_info("sending from outputs to drive")
 
-        for f in tqdm(ls_figs, desc=" >>> ", unit="file"):
+        for f in tqdm(ls_figs, desc=" >>> ", unit="file", bar_format=PBAR_FORMAT):
             p = Path(f)
             nm = p.stem
             chapter = "chapter" + nm.split("-")[0].replace("C", "")

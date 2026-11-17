@@ -106,7 +106,7 @@ class ScriptReformatFlags(Script):
             return None
 
         self.print_info("loading data ...")
-        with tqdm(ls_notes, desc=" >>> ", unit="file") as pbar:
+        with tqdm(ls_notes, desc=" >>> ", unit="file", bar_format=PBAR_FORMAT) as pbar:
             nc.load_list(pbar)
 
         s = get_message(f"{len(ls_notes)} notes loaded to collection.")

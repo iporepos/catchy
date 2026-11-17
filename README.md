@@ -207,6 +207,9 @@ python build_figures.py --chapter 3 --recent 48 -w              # SVGs modified 
 > [!WARNING]
 > **Re-run: safe but expensive.** Re-renders and re-copies everything in scope each time. There is no skip-if-unchanged logic.
 
+> [!NOTE]
+> **Write gate is batch-aware.** With `-w`, batches of fewer than 3 figures (`LARGE_BATCH`) write without the confirmation prompt (e.g. `--figure`, small `--recent` runs). Larger batches ask once per run; with `--chapter all`, size is counted per chapter.
+
 ---
 
 ### `build_catalog`
@@ -307,6 +310,28 @@ python plot_figures.py --chapter all -w                   # write all chapters
 
 > [!TIP]
 > **Re-run: safe.** Write mode overwrites output files deterministically. Safe mode (no `-w`) renders each figure and opens it in an interactive window — no files are written. Each window must be closed before the next figure is displayed.
+
+---
+
+## Manuscript tools (`tex/manuscript/`)
+
+### `lint_purge_authornotes`
+
+Removes every `\authornote{...}` call (macro + braced argument, nested braces and multi-line
+notes included) from a manuscript `.tex` file. The `\newcommand` definition and notes inside
+`%` comments are kept. Whole-line notes drop the line; inline notes drop the surrounding space.
+Takes a file path, not `--chapter`.
+
+```bash
+python lint_purge_authornotes.py <path.tex> [-o <out.tex>]
+
+# examples
+python lint_purge_authornotes.py chapter07_T12.tex               # in place, backup to backup/
+python lint_purge_authornotes.py chapter07_T12.tex -o clean.tex  # input untouched, no backup
+```
+
+> [!TIP]
+> **Re-run: safe.** A second run finds no notes and leaves the file unchanged (apart from a new backup). Unbalanced braces in a note raise an error and nothing is written.
 
 ---
 

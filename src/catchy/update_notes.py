@@ -104,7 +104,7 @@ class ScriptUpdateNotes(Script):
         # ------------------------------------------------------------------
         self.print_step(f"updating notes ... ")
 
-        for f_note in tqdm(ls_notes, desc="Updating notes", unit="note"):
+        for f_note in tqdm(ls_notes, desc="Updating notes", unit="note", bar_format=PBAR_FORMAT):
             p = Path(f_note)
 
             # self.print_step(f"updating {p.name}")

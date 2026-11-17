@@ -100,7 +100,7 @@ class ScriptStandardize(Script):
             return None
 
         self.print_info("loading data ...")
-        with tqdm(ls_notes, desc=" >>> ", unit="file") as pbar:
+        with tqdm(ls_notes, desc=" >>> ", unit="file", bar_format=PBAR_FORMAT) as pbar:
             nc.load_list(pbar)
 
         s = get_message(f"{len(ls_notes)} notes loaded to collection.")
@@ -124,7 +124,7 @@ class ScriptStandardize(Script):
         counter_strokes = 0
 
         self.print_info(f"processing data")
-        for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="files"):
+        for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="files", bar_format=PBAR_FORMAT):
             # for row in df.to_dict(orient='records'):
 
             # =============================

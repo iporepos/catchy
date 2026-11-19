@@ -88,3 +88,13 @@
   - Batch size is per chapter (`--chapter all` processes chapters one at a time).
 - `core.py` untouched; other scripts keep the upfront prompt.
 - README `build_figures` section: added a note on the batch-aware gate.
+
+## 2026-11-18 10:20 (tolerate Inkscape crash-on-exit in build_figures)
+
+- Cause found: Inkscape 1.2.2 writes the PDF in `FigureSVG.to_pdf` stage 2 (`_crop.svg` -> pdf), then crashes on exit with `0xC0000374` (exit 3221226356). `check=True` in `losalamos` raised, so the figure was marked failed, its JPEG was skipped, and nothing was sent to drive. Seen on `C06-mtx-force`; File > Clean Up Document did not help.
+- `ScriptBuildFigures._tolerate_exit_crash(func, expected_outputs, **kwargs)` (staticmethod, `src/catchy/build_figures.py`):
+  - Records `t0`, calls `func`. On `subprocess.CalledProcessError`, accepts the step only if every expected output exists, is non-empty, and has `st_mtime >= t0` (`t0` taken 2 s early: Windows file timestamps use a coarser clock than `time.time()`, a fresh file was rejected in testing without the margin); otherwise re-raises.
+  - Returns a warning string when tolerated, else None.
+- `processing()`: PDF step goes through the handler with expected output `STD_OUTPUT / "<fig>_T1.pdf"`; tolerated figures go into new `ls_tolerated` and still into `ls_built` (JPEG built, sent to drive). Summary prints them as "built despite a renderer crash on exit".
+- JPEG/PNG steps unchanged (`to_image` does not use `check=True`). `losalamos` untouched.
+- Module header and README `build_figures` section updated with a note.

@@ -20,9 +20,16 @@ In write mode (``-w``), the overwrite confirmation is deferred until the batch
 size is known: batches smaller than ``LARGE_BATCH`` (3) figures are written
 without asking, larger ones ask once per run. With ``--chapter all`` the
 batch size is counted per chapter.
+
+If Inkscape crashes on exit after writing the PDF (e.g. Windows status
+``0xC0000374``), the figure is not counted as failed: the PDF step is accepted
+when its output exists, is non-empty, and was written during the run. The
+build then continues to the JPEG step, and such figures are listed in a
+separate warning at the end.
 """
 
 import time
+import subprocess
 import pprint, os
 from pathlib import Path
 
@@ -207,6 +214,37 @@ class ScriptBuildFigures(Script):
 
         return time.time() - fsvg.stat().st_mtime <= self.recent * 3600
 
+    @staticmethod
+    def _tolerate_exit_crash(func, expected_outputs, **kwargs):
+        """
+        Runs a render step, tolerating a renderer crash if its outputs were written.
+
+        Inkscape may crash on exit (e.g. ``0xC0000374``) after writing the file.
+        If ``func`` raises :class:`subprocess.CalledProcessError` but every
+        expected output exists, is non-empty, and was modified during the call,
+        the error is downgraded to a warning. Otherwise the error is re-raised.
+
+        :param func: The render step to call (e.g. :meth:`build_pdf`).
+        :type func: callable
+        :param expected_outputs: Files the step must produce.
+        :type expected_outputs: list of pathlib.Path
+        :param kwargs: Keyword arguments passed to ``func``.
+        :returns: A warning message if a crash was tolerated, None otherwise.
+        :rtype: str or None
+        :raises subprocess.CalledProcessError: If any expected output is missing, empty, or stale.
+        """
+        # 2 s margin: Windows file timestamps use a coarser clock than time.time()
+        t0 = time.time() - 2
+        try:
+            func(**kwargs)
+        except subprocess.CalledProcessError as e:
+            for fo in expected_outputs:
+                fo = Path(fo)
+                if not fo.is_file() or fo.stat().st_size == 0 or fo.stat().st_mtime < t0:
+                    raise
+            return f"renderer exited with status {e.returncode}, but outputs were written"
+        return None
+
     def processing(self):
         """
         Executes the main figure rendering workflow.
@@ -316,6 +354,7 @@ class ScriptBuildFigures(Script):
         # heading_subsection(msg="Render SVG")
         ls_skipped = []
         ls_failed = []
+        ls_tolerated = []
         ls_built = []
         self.print_info(f"rendering SVGs ...")
         for _, row in tqdm(df.iterrows(), total=len(df), desc=" >>> ", unit="file", bar_format=PBAR_FORMAT):
@@ -339,7 +378,16 @@ class ScriptBuildFigures(Script):
                 if self.write:
 
                     # PDF building
-                    self.build_pdf(f.stem, svg, row, opacity=0)
+                    msg = self._tolerate_exit_crash(
+                        self.build_pdf,
+                        expected_outputs=[STD_OUTPUT / f"{f.stem}_T1.pdf"],
+                        fname=f.stem,
+                        svg_note=svg,
+                        metadata=row,
+                        opacity=0,
+                    )
+                    if msg:
+                        ls_tolerated.append((fig_name, msg))
 
                     # JPEG building
                     self.build_image(
@@ -376,6 +424,11 @@ class ScriptBuildFigures(Script):
         if ls_skipped:
             self.print_warn(msg="Some figures were skipped (hard-coded list):")
             pprint.pp(ls_skipped)
+
+        if ls_tolerated:
+            self.print_warn(msg="Some figures built despite a renderer crash on exit:")
+            for name, msg in ls_tolerated:
+                self.print_warn(f"  {name}: {msg}")
 
         if ls_failed:
             self.print_warn(msg="Some figures failed to build:")

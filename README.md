@@ -210,6 +210,9 @@ python build_figures.py --chapter 3 --recent 48 -w              # SVGs modified 
 > [!NOTE]
 > **Write gate is batch-aware.** With `-w`, batches of fewer than 3 figures (`LARGE_BATCH`) write without the confirmation prompt (e.g. `--figure`, small `--recent` runs). Larger batches ask once per run; with `--chapter all`, size is counted per chapter.
 
+> [!NOTE]
+> **Renderer crash on exit is tolerated.** If Inkscape exits with an error after the PDF step (e.g. `3221226356` / `0xC0000374`), the figure still counts as built if the PDF exists, is non-empty, and was written during this run. It is listed under *"built despite a renderer crash on exit"*. A missing or stale PDF is still a failure.
+
 ---
 
 ### `build_catalog`

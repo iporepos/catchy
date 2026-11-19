@@ -239,6 +239,30 @@ python build_catalog.py --chapter all -w  # full catalog for all chapters
 
 ---
 
+### `report_status`
+
+Read-only progress report, independent of `build_catalog`. Counts figures per chapter as
+concluded / pending / standby / undefined (same MVP rule as the catalog: `ftp*` and
+`concluded` → concluded, contains `pending` → pending, `stand-by` → standby) and prints
+counts and % per chapter plus a TOTAL row. Default order is most-concluded first, so the
+chapters closest to done are on top. `--plot` saves a 100% stacked bar chart to
+`STD_OUTPUT/status_report.png`.
+
+```bash
+python report_status.py [--chapter <N|all>] [--sort progress|chapter] [--plot]
+
+# examples
+python report_status.py                   # all chapters, table only
+python report_status.py --chapter 7       # one chapter
+python report_status.py --plot            # table + PNG chart
+python report_status.py --sort chapter    # numeric chapter order
+```
+
+> [!TIP]
+> **Re-run: safe.** No prompt, no note writes; only the optional PNG is overwritten.
+
+---
+
 ### `update_notes`
 
 Synchronises YAML front-matter fields in figure note files with values derived

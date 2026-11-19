@@ -98,3 +98,24 @@
 - `processing()`: PDF step goes through the handler with expected output `STD_OUTPUT / "<fig>_T1.pdf"`; tolerated figures go into new `ls_tolerated` and still into `ls_built` (JPEG built, sent to drive). Summary prints them as "built despite a renderer crash on exit".
 - JPEG/PNG steps unchanged (`to_image` does not use `check=True`). `losalamos` untouched.
 - Module header and README `build_figures` section updated with a note.
+
+## 2026-11-19 12:18 (status report, decoupled from build_catalog)
+
+- New `src/catchy/report_status.py` — `ScriptReportStatus(Script)`, read-only.
+  - Per chapter: globs `chapterNN/C*-*-*.md`, loads with `NoteCollFigure`, counts `status` via module function `classify_status()` into concluded / pending / standby / undefined.
+  - `classify_status()` duplicates the MVP rule of `build_catalog.get_status_mvp` on purpose (no import, to stay decoupled). Missing status → stand-by. If the catalog rule changes, update both.
+  - `run()` override: after the chapter loop, `get_report()` builds the table (counts + `%` columns + TOTAL row) and prints it. `--sort progress` (default, highest %concluded first) or `chapter`.
+  - `--plot`: `plot_report()` saves a 100% stacked barh chart to `STD_OUTPUT/status_report.png` (status colors: concluded green, pending yellow, standby orange, undefined gray). matplotlib imported lazily.
+  - `--chapter` defaults to `all` (`parser.set_defaults`). `handle_mode` overridden: no write gate, no "press any key".
+- `build_catalog.py` and `core.py` untouched.
+- README: new `report_status` section after `build_catalog`.
+- First run (all chapters): 563 figures, 69.4% concluded, 2.8% pending, 27.5% standby; one undefined (`C15-mtx-precipitation`, status `on going`).
+
+## 2026-11-19 12:30 (status report chart: absolute numbers)
+
+- `ScriptReportStatus.plot_report` (`src/catchy/report_status.py`): segment labels now show absolute counts instead of % (axis stays in %); label threshold lowered from 8% to 6% of bar width.
+- Right of each bar: `n=<total>`, plus `| <N> pending` when the chapter has pending figures (pending segments are usually too narrow for an inside label). `xlim` widened 110 → 125 to fit it.
+
+## 2026-11-19 12:31 (status report chart: stand-by count instead of pending)
+
+- `plot_report`: the right-of-bar annotation now shows `| <N> stand-by` (was pending; misread request). Inside-segment count labels unchanged.
